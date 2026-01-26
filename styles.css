@@ -84,6 +84,34 @@ header h1 {
     background: #3742fa;
 }
 
+.btn-auth {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.btn-auth:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+}
+
+#authSection {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+#userInfo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.user-email {
+    color: #667eea;
+    font-weight: 600;
+    font-size: 14px;
+}
+
 .stats {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -398,6 +426,111 @@ header h1 {
     gap: 10px;
     justify-content: flex-end;
     margin-top: 25px;
+}
+
+/* Auth Modal Styles */
+.auth-modal {
+    max-width: 450px;
+}
+
+.auth-tabs {
+    display: flex;
+    gap: 0;
+    margin-bottom: 25px;
+    border-bottom: 2px solid #e0e0e0;
+}
+
+.auth-tab {
+    flex: 1;
+    padding: 12px 20px;
+    border: none;
+    background: transparent;
+    color: #666;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.auth-tab.active {
+    color: #667eea;
+}
+
+.auth-tab.active::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: #667eea;
+}
+
+.auth-error {
+    background: #ff7675;
+    color: white;
+    padding: 12px;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    font-size: 14px;
+}
+
+.auth-info {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid #e0e0e0;
+    text-align: center;
+}
+
+.auth-info p {
+    color: #666;
+    font-size: 13px;
+    margin: 8px 0;
+}
+
+.auth-divider {
+    display: flex;
+    align-items: center;
+    text-align: center;
+    margin: 20px 0;
+}
+
+.auth-divider::before,
+.auth-divider::after {
+    content: '';
+    flex: 1;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.auth-divider span {
+    padding: 0 15px;
+    color: #999;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.btn-google-signin {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    background: white;
+    border: 1px solid #dadce0;
+    color: #3c4043;
+    font-weight: 500;
+    padding: 12px 24px;
+    transition: all 0.2s ease;
+}
+
+.btn-google-signin:hover {
+    background: #f8f9fa;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    transform: none;
+}
+
+.btn-google-signin svg {
+    flex-shrink: 0;
 }
 
 /* Responsive Design */

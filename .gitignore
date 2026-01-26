@@ -1,0 +1,20 @@
+# Firebase configuration - IMPORTANT: Keep your credentials private!
+# Uncomment the line below if you want to keep your Firebase config private
+# firebase-config.js
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs
+*.log
+
+# Temporary files
+*.tmp
+*~
