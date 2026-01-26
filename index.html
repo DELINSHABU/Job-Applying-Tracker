@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Job Application Tracker</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📋 Job Application Tracker</h1>
+            <div class="header-actions">
+                <button id="exportBtn" class="btn btn-secondary">Export to XML</button>
+                <button id="addJobBtn" class="btn btn-primary">+ Add Job Application</button>
+            </div>
+        </header>
+
+        <div class="stats">
+            <div class="stat-card">
+                <h3 id="totalApplied">0</h3>
+                <p>Total Applied</p>
+            </div>
+            <div class="stat-card">
+                <h3 id="totalPending">0</h3>
+                <p>Pending</p>
+            </div>
+            <div class="stat-card">
+                <h3 id="totalCallback">0</h3>
+                <p>Callback</p>
+            </div>
+            <div class="stat-card">
+                <h3 id="totalRejected">0</h3>
+                <p>Rejected</p>
+            </div>
+        </div>
+
+        <div class="filters">
+            <input type="text" id="searchInput" placeholder="🔍 Search by company, position, or platform..." class="search-input">
+            <select id="statusFilter" class="filter-select">
+                <option value="all">All Status</option>
+                <option value="pending">Pending</option>
+                <option value="callback">Callback</option>
+                <option value="replied">Replied</option>
+                <option value="rejected">Rejected</option>
+            </select>
+            <select id="platformFilter" class="filter-select">
+                <option value="all">All Platforms</option>
+                <option value="indeed">Indeed</option>
+                <option value="linkedin">LinkedIn</option>
+                <option value="whatsapp">WhatsApp</option>
+                <option value="direct">Direct</option>
+            </select>
+        </div>
+
+        <div id="jobsList" class="jobs-list"></div>
+
+        <!-- Modal for Adding/Editing Jobs -->
+        <div id="jobModal" class="modal">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <h2 id="modalTitle">Add Job Application</h2>
+                <form id="jobForm">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="companyName">Company Name *</label>
+                            <input type="text" id="companyName" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="position">Position *</label>
+                            <input type="text" id="position" required>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="website">Company Website</label>
+                            <input type="url" id="website" placeholder="https://example.com">
+                        </div>
+                        <div class="form-group">
+                            <label for="jobListing">Job Listing URL</label>
+                            <input type="url" id="jobListing" placeholder="https://example.com/job">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="salary">Salary</label>
+                            <input type="text" id="salary" placeholder="e.g., $50,000 - $70,000">
+                        </div>
+                        <div class="form-group">
+                            <label for="location">Location</label>
+                            <input type="text" id="location" placeholder="e.g., Remote, New York">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="email">Company Email</label>
+                            <input type="email" id="email" placeholder="hr@company.com">
+                        </div>
+                        <div class="form-group">
+                            <label for="phone">Phone Number</label>
+                            <input type="tel" id="phone" placeholder="+1 234 567 8900">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="jobPostDate">Job Post Date</label>
+                            <input type="date" id="jobPostDate">
+                        </div>
+                        <div class="form-group">
+                            <label for="appliedDate">Applied Date</label>
+                            <input type="date" id="appliedDate">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="platform">Platform *</label>
+                            <select id="platform" required>
+                                <option value="">Select Platform</option>
+                                <option value="indeed">Indeed</option>
+                                <option value="linkedin">LinkedIn</option>
+                                <option value="whatsapp">WhatsApp</option>
+                                <option value="direct">Direct</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="status">Status *</label>
+                            <select id="status" required>
+                                <option value="pending">Pending</option>
+                                <option value="callback">Callback</option>
+                                <option value="replied">Replied</option>
+                                <option value="rejected">Rejected</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="notes">Notes</label>
+                        <textarea id="notes" rows="3" placeholder="Additional notes..."></textarea>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="button" id="cancelBtn" class="btn btn-secondary">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Save</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
