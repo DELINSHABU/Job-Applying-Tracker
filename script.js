@@ -64,6 +64,9 @@ class JobTracker {
         document.getElementById('searchInput').addEventListener('input', () => this.filterJobs());
         document.getElementById('statusFilter').addEventListener('change', () => this.filterJobs());
         document.getElementById('platformFilter').addEventListener('change', () => this.filterJobs());
+        
+        // Platform dropdown handler for custom option
+        document.getElementById('platform').addEventListener('change', (e) => this.handlePlatformChange(e));
     }
 
     openModal(job = null) {
@@ -87,7 +90,23 @@ class JobTracker {
     closeModal() {
         document.getElementById('jobModal').style.display = 'none';
         document.getElementById('jobForm').reset();
+        document.getElementById('customPlatform').style.display = 'none';
         this.currentEditId = null;
+    }
+
+    handlePlatformChange(event) {
+        const platformSelect = event.target;
+        const customPlatformInput = document.getElementById('customPlatform');
+        
+        if (platformSelect.value === 'custom') {
+            customPlatformInput.style.display = 'block';
+            customPlatformInput.required = true;
+            customPlatformInput.focus();
+        } else {
+            customPlatformInput.style.display = 'none';
+            customPlatformInput.required = false;
+            customPlatformInput.value = '';
+        }
     }
 
     fillForm(job) {
@@ -101,7 +120,27 @@ class JobTracker {
         document.getElementById('phone').value = job.phone || '';
         document.getElementById('jobPostDate').value = job.jobPostDate || '';
         document.getElementById('appliedDate').value = job.appliedDate || '';
-        document.getElementById('platform').value = job.platform || '';
+        
+        // Handle platform - check if it's a standard option or custom
+        const platformSelect = document.getElementById('platform');
+        const customPlatformInput = document.getElementById('customPlatform');
+        const platformValue = job.platform || '';
+        
+        // Check if platform exists in dropdown
+        const optionExists = Array.from(platformSelect.options).some(option => 
+            option.value === platformValue && option.value !== 'custom'
+        );
+        
+        if (optionExists) {
+            platformSelect.value = platformValue;
+            customPlatformInput.style.display = 'none';
+        } else if (platformValue) {
+            // Custom platform - add it to dropdown and select it
+            this.addPlatformToDropdown(platformValue);
+            platformSelect.value = platformValue;
+            customPlatformInput.style.display = 'none';
+        }
+        
         document.getElementById('status').value = job.status || '';
         document.getElementById('notes').value = job.notes || '';
     }
@@ -111,6 +150,22 @@ class JobTracker {
             alert('Please sign in to save your data.');
             this.openAuthModal();
             return;
+        }
+
+        // Handle custom platform
+        let platformValue = document.getElementById('platform').value;
+        const customPlatformInput = document.getElementById('customPlatform');
+        
+        if (platformValue === 'custom') {
+            const customPlatform = customPlatformInput.value.trim();
+            if (!customPlatform) {
+                alert('Please enter a custom platform name.');
+                customPlatformInput.focus();
+                return;
+            }
+            platformValue = customPlatform;
+            // Add to dropdown for future use
+            this.addPlatformToDropdown(platformValue);
         }
 
         const job = {
@@ -125,7 +180,7 @@ class JobTracker {
             phone: document.getElementById('phone').value,
             jobPostDate: document.getElementById('jobPostDate').value,
             appliedDate: document.getElementById('appliedDate').value,
-            platform: document.getElementById('platform').value,
+            platform: platformValue,
             status: document.getElementById('status').value,
             notes: document.getElementById('notes').value,
             createdAt: this.currentEditId ? this.jobs.find(j => j.id === this.currentEditId).createdAt : new Date().toISOString()
@@ -151,6 +206,53 @@ class JobTracker {
             this.renderJobs();
             this.updateStats();
         }
+    }
+
+    addPlatformToDropdown(platformName) {
+        const platformSelect = document.getElementById('platform');
+        const platformFilter = document.getElementById('platformFilter');
+        const normalizedName = platformName.toLowerCase();
+        
+        // Check if platform already exists
+        const existsInSelect = Array.from(platformSelect.options).some(option => 
+            option.value.toLowerCase() === normalizedName && option.value !== 'custom'
+        );
+        
+        if (!existsInSelect) {
+            // Add to form dropdown (before 'custom' option)
+            const customOption = platformSelect.querySelector('option[value="custom"]');
+            const newOption = document.createElement('option');
+            newOption.value = platformName;
+            newOption.textContent = platformName.charAt(0).toUpperCase() + platformName.slice(1);
+            platformSelect.insertBefore(newOption, customOption);
+            
+            // Add to filter dropdown
+            const existsInFilter = Array.from(platformFilter.options).some(option => 
+                option.value.toLowerCase() === normalizedName
+            );
+            
+            if (!existsInFilter) {
+                const filterOption = document.createElement('option');
+                filterOption.value = platformName;
+                filterOption.textContent = platformName.charAt(0).toUpperCase() + platformName.slice(1);
+                platformFilter.appendChild(filterOption);
+            }
+        }
+    }
+
+    updatePlatformFilters() {
+        // Get all unique platforms from jobs
+        const platforms = new Set();
+        this.jobs.forEach(job => {
+            if (job.platform) {
+                platforms.add(job.platform);
+            }
+        });
+        
+        // Add custom platforms to dropdowns
+        platforms.forEach(platform => {
+            this.addPlatformToDropdown(platform);
+        });
     }
 
     filterJobs() {
@@ -402,20 +504,27 @@ class JobTracker {
             console.error('Google Sign-In error:', error);
             console.error('Error code:', error.code);
             console.error('Error message:', error.message);
+            console.error('Full error:', JSON.stringify(error, null, 2));
             
             // Handle specific errors
             if (error.code === 'auth/popup-closed-by-user') {
                 // User closed popup, no error message needed
                 return;
-            } else if (error.code === 'auth/popup-blocked') {
-                this.showAuthError('Popup was blocked by your browser. Please allow popups for this site.');
-            } else if (error.code === 'auth/unauthorized-domain' || error.code === 'auth/operation-not-allowed') {
-                this.showAuthError('Google Sign-In is not properly configured. Please check Firebase Console setup.');
             } else if (error.code === 'auth/cancelled-popup-request') {
                 // Multiple popup requests, ignore
                 return;
+            } else if (error.code === 'auth/popup-blocked') {
+                this.showAuthError('Popup was blocked. Please allow popups for this site and try again.');
+            } else if (error.code === 'auth/unauthorized-domain') {
+                this.showAuthError('This domain is not authorized. Add "' + window.location.hostname + '" to Firebase Console → Authentication → Settings → Authorized domains.');
+            } else if (error.code === 'auth/operation-not-allowed') {
+                this.showAuthError('Google Sign-In provider is disabled in Firebase Console. Please enable it in Authentication → Sign-in method.');
+            } else if (error.code === 'auth/account-exists-with-different-credential') {
+                this.showAuthError('An account already exists with this email using a different sign-in method. Try signing in with email/password instead.');
+            } else if (error.code === 'auth/invalid-credential') {
+                this.showAuthError('Invalid credentials. Please try again or contact support.');
             } else {
-                this.showAuthError(`Google Sign-In failed: ${error.message}`);
+                this.showAuthError(`Sign-in failed (${error.code}): ${error.message}`);
             }
         }
     }
@@ -489,6 +598,7 @@ class JobTracker {
                 this.jobs.push({ id: doc.id, ...doc.data() });
             });
 
+            this.updatePlatformFilters();
             this.renderJobs();
             this.updateStats();
         } catch (error) {
@@ -606,6 +716,7 @@ class JobTracker {
             event.target.value = '';
 
             // Show results
+            this.updatePlatformFilters();
             this.renderJobs();
             this.updateStats();
 

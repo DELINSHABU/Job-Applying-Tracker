@@ -1,0 +1,102 @@
+╔══════════════════════════════════════════════════════════════╗
+║          GOOGLE SIGN-IN SETUP CHECKLIST                      ║
+║          Follow these steps in order                          ║
+╚══════════════════════════════════════════════════════════════╝
+
+□ Step 1: Open Firebase Console
+  → Go to: https://console.firebase.google.com/
+  → Select your project
+
+□ Step 2: Navigate to Authentication
+  → Click "Authentication" in left sidebar
+  → Click "Sign-in method" tab
+
+□ Step 3: Enable Google Provider
+  → Find "Google" in the list
+  → Click on it
+  → Toggle "Enable" to ON (should turn green)
+  → Select support email from dropdown
+  → Click "Save" button
+
+□ Step 4: Check Authorized Domains
+  → Click "Settings" tab (still in Authentication)
+  → Scroll to "Authorized domains" section
+  → Verify "localhost" is in the list
+  → If not, click "Add domain" and add "localhost"
+
+□ Step 5: Test
+  → Go back to your app (http://localhost:8000)
+  → Refresh the page (F5)
+  → Click "🔐 Login / Sign Up"
+  → Click "Continue with Google"
+  → Should open Google account picker popup
+
+╔══════════════════════════════════════════════════════════════╗
+║                    VERIFICATION                               ║
+╚══════════════════════════════════════════════════════════════╝
+
+When Google Sign-In is properly enabled, you should see:
+
+✓ In Firebase Console → Authentication → Sign-in method:
+  - Google: Enabled (green toggle)
+  - Status: "Enabled"
+  - Support email: [your email]
+
+✓ In Firebase Console → Authentication → Settings:
+  - Authorized domains includes: localhost
+
+✓ In your app:
+  - Google popup opens
+  - Can select Google account
+  - Redirects back to app
+  - Email appears in header
+  - No error messages
+
+╔══════════════════════════════════════════════════════════════╗
+║                  TROUBLESHOOTING                              ║
+╚══════════════════════════════════════════════════════════════╝
+
+If still getting error:
+
+1. Check browser console (F12 → Console tab)
+   Look for: "Error code: auth/operation-not-allowed"
+   
+2. Verify Firebase config in firebase-config.js
+   - No "YOUR_" placeholders
+   - authDomain matches your project
+   
+3. Try clearing browser cache:
+   - Ctrl + Shift + Delete
+   - Clear cached images and files
+   - Close and reopen browser
+
+4. Try Email/Password instead:
+   - Click "Sign Up" tab
+   - Create account with email
+   - This should work without Google
+
+╔══════════════════════════════════════════════════════════════╗
+║              ALTERNATIVE: SKIP GOOGLE SIGN-IN                 ║
+╚══════════════════════════════════════════════════════════════╝
+
+You can use the app WITHOUT Google Sign-In:
+
+1. Click "🔐 Login / Sign Up" button
+2. Click "Sign Up" tab
+3. Enter email and password (min 6 characters)
+4. Click "Sign Up"
+5. Done! You're logged in
+
+Email/Password is already enabled and ready to use.
+
+╔══════════════════════════════════════════════════════════════╗
+║                      NEED HELP?                               ║
+╚══════════════════════════════════════════════════════════════╝
+
+See detailed guides:
+- GOOGLE_FIX.md - Detailed fix instructions
+- FIREBASE_SETUP.md - Complete Firebase setup
+- GOOGLE_SIGNIN_TROUBLESHOOTING.md - All troubleshooting steps
+- DIAGNOSTIC.md - Run diagnostic script
+
+Still stuck? Open browser console (F12) and look for error messages.
