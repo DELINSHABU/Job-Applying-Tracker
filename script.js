@@ -19,13 +19,26 @@ class JobTracker {
         // Modal controls
         document.getElementById('addJobBtn').addEventListener('click', () => this.openModal());
         document.getElementById('cancelBtn').addEventListener('click', () => this.closeModal());
-        document.querySelector('.close').addEventListener('click', () => this.closeModal());
+        
+        // Job modal close button (first .close in jobModal)
+        const jobModalClose = document.querySelector('#jobModal .close');
+        if (jobModalClose) {
+            jobModalClose.addEventListener('click', () => this.closeModal());
+        }
         
         // Click outside modal to close
         window.addEventListener('click', (e) => {
-            const modal = document.getElementById('jobModal');
-            if (e.target === modal) {
+            const jobModal = document.getElementById('jobModal');
+            const quickAddModal = document.getElementById('quickAddModal');
+            const authModal = document.getElementById('authModal');
+            if (e.target === jobModal) {
                 this.closeModal();
+            }
+            if (e.target === quickAddModal) {
+                this.closeQuickAddModal();
+            }
+            if (e.target === authModal) {
+                this.closeAuthModal();
             }
         });
 
@@ -67,6 +80,17 @@ class JobTracker {
         
         // Platform dropdown handler for custom option
         document.getElementById('platform').addEventListener('change', (e) => this.handlePlatformChange(e));
+
+        // Quick Add from Text
+        const quickAddBtn = document.getElementById('quickAddBtn');
+        const quickAddModalClose = document.getElementById('quickAddModalClose');
+        const extractJobBtn = document.getElementById('extractJobBtn');
+        const quickAddCancelBtn = document.getElementById('quickAddCancelBtn');
+        
+        if (quickAddBtn) quickAddBtn.addEventListener('click', () => this.openQuickAddModal());
+        if (quickAddModalClose) quickAddModalClose.addEventListener('click', () => this.closeQuickAddModal());
+        if (extractJobBtn) extractJobBtn.addEventListener('click', () => this.extractJobFromText());
+        if (quickAddCancelBtn) quickAddCancelBtn.addEventListener('click', () => this.closeQuickAddModal());
     }
 
     openModal(job = null) {
@@ -736,6 +760,255 @@ class JobTracker {
     getXMLNodeValue(parentNode, tagName) {
         const node = parentNode.querySelector(tagName);
         return node ? node.textContent : '';
+    }
+
+    // Quick Add from Text Methods
+    openQuickAddModal() {
+        if (!this.isSignedIn) {
+            alert('Please sign in first to use Quick Add.');
+            this.openAuthModal();
+            return;
+        }
+
+        document.getElementById('quickAddModal').style.display = 'block';
+        this.hideQuickAddError();
+    }
+
+    closeQuickAddModal() {
+        document.getElementById('quickAddModal').style.display = 'none';
+        document.getElementById('jobText').value = '';
+        document.getElementById('jobListingUrl').value = '';
+        this.hideQuickAddError();
+    }
+
+    extractJobFromText() {
+        const jobText = document.getElementById('jobText').value.trim();
+        const jobListingUrl = document.getElementById('jobListingUrl').value.trim();
+        
+        if (!jobText) {
+            this.showQuickAddError('Please paste the job listing text.');
+            return;
+        }
+
+        if (jobText.length < 20) {
+            this.showQuickAddError('Please paste more content from the job listing.');
+            return;
+        }
+
+        // Extract job details using simple pattern matching
+        const jobDetails = this.parseJobText(jobText, jobListingUrl);
+        
+        // Close quick add modal and open the job form with extracted data
+        this.closeQuickAddModal();
+        this.openModalWithExtractedData(jobDetails, jobListingUrl);
+    }
+
+    parseJobText(text, url) {
+        const result = {
+            companyName: '',
+            position: '',
+            salary: '',
+            location: '',
+            email: '',
+            phone: '',
+            platform: '',
+            notes: ''
+        };
+
+        // Normalize text
+        const normalizedText = text.replace(/\r\n/g, '\n');
+        const lines = normalizedText.split('\n').map(l => l.trim()).filter(l => l);
+
+        // Extract email
+        const emailMatch = text.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/i);
+        if (emailMatch) {
+            result.email = emailMatch[0];
+        }
+
+        // Extract phone
+        const phoneMatch = text.match(/(?:\+?1[-.]?)?\(?\d{3}\)?[-.]?\d{3}[-.]?\d{4}/)
+            || text.match(/\d{3}[-.]\d{3}[-.]\d{4}/);
+        if (phoneMatch) {
+            result.phone = phoneMatch[0];
+        }
+
+        // Extract salary - look for currency patterns
+        const salaryPatterns = [
+            /\$[\d,]+(?:\.\d{2})?(?:\s*[-–—to]+\s*\$[\d,]+(?:\.\d{2})?)?(?:\s*(?:per|an|a|\/)\s*(?:year|hour|hr|month|week|annually))?/gi,
+            /(?:salary|pay|compensation)[:\s]*\$?[\d,]+(?:\s*[-–—to]+\s*\$?[\d,]+)?/gi,
+            /\$[\d,]+\s*[-–—]\s*\$[\d,]+/gi,
+            /[\d,]+k\s*[-–—to]+\s*[\d,]+k/gi
+        ];
+        
+        for (const pattern of salaryPatterns) {
+            const match = text.match(pattern);
+            if (match) {
+                result.salary = match[0].trim();
+                break;
+            }
+        }
+
+        // Extract location - look for common patterns
+        const locationPatterns = [
+            /(?:location|located|based)[:\s]+([^\n,]+(?:,\s*[A-Z]{2})?)/i,
+            /(?:remote|hybrid|on-?site|in-?office)/i,
+            /([A-Z][a-z]+(?:\s+[A-Z][a-z]+)*,\s*[A-Z]{2}(?:\s+\d{5})?)/,
+            /([A-Z][a-z]+,\s*[A-Z][a-z]+(?:\s+[A-Z][a-z]+)*)/
+        ];
+        
+        for (const pattern of locationPatterns) {
+            const match = text.match(pattern);
+            if (match) {
+                result.location = (match[1] || match[0]).trim();
+                break;
+            }
+        }
+
+        // Extract company name - look for patterns
+        const companyPatterns = [
+            /(?:company|employer|at|@)[:\s]+([^\n]+)/i,
+            /(?:about|join)\s+([A-Z][A-Za-z0-9\s&]+?)(?:\s+is|\s+are|\.|,|\n)/,
+            /([A-Z][A-Za-z0-9\s&]{2,30})\s+(?:is\s+(?:hiring|looking|seeking)|seeks)/i
+        ];
+        
+        for (const pattern of companyPatterns) {
+            const match = text.match(pattern);
+            if (match && match[1]) {
+                result.companyName = match[1].trim().substring(0, 50);
+                break;
+            }
+        }
+
+        // Extract job title/position
+        const titlePatterns = [
+            /(?:job\s*title|position|role)[:\s]+([^\n]+)/i,
+            /(?:hiring|seeking|looking\s+for)[:\s]+(?:a\s+)?([^\n.]+)/i,
+            /^([A-Z][A-Za-z\s\/&-]+(?:Engineer|Developer|Manager|Designer|Analyst|Specialist|Coordinator|Director|Lead|Associate|Assistant|Intern|Senior|Junior|Sr\.|Jr\.)[A-Za-z\s]*)/m
+        ];
+        
+        for (const pattern of titlePatterns) {
+            const match = text.match(pattern);
+            if (match && match[1]) {
+                result.position = match[1].trim().substring(0, 100);
+                break;
+            }
+        }
+
+        // If no position found, try first line that looks like a title
+        if (!result.position && lines.length > 0) {
+            for (const line of lines.slice(0, 5)) {
+                if (line.length > 5 && line.length < 80 && !line.includes('@') && !line.match(/^\d/)) {
+                    result.position = line;
+                    break;
+                }
+            }
+        }
+
+        // If no company found, try second meaningful line
+        if (!result.companyName && lines.length > 1) {
+            for (const line of lines.slice(1, 6)) {
+                if (line.length > 2 && line.length < 50 && !line.includes('@') && !line.match(/^\d/) && !line.match(/^\$/)) {
+                    result.companyName = line;
+                    break;
+                }
+            }
+        }
+
+        // Detect platform from URL
+        if (url) {
+            const urlLower = url.toLowerCase();
+            if (urlLower.includes('linkedin')) result.platform = 'linkedin';
+            else if (urlLower.includes('indeed')) result.platform = 'indeed';
+            else if (urlLower.includes('glassdoor')) result.platform = 'glassdoor';
+            else if (urlLower.includes('ziprecruiter')) result.platform = 'ziprecruiter';
+            else if (urlLower.includes('monster')) result.platform = 'monster';
+        }
+
+        // Detect platform from text if not found
+        if (!result.platform) {
+            const textLower = text.toLowerCase();
+            if (textLower.includes('linkedin')) result.platform = 'linkedin';
+            else if (textLower.includes('indeed')) result.platform = 'indeed';
+            else if (textLower.includes('glassdoor')) result.platform = 'glassdoor';
+            else if (textLower.includes('ziprecruiter')) result.platform = 'ziprecruiter';
+            else if (textLower.includes('monster')) result.platform = 'monster';
+        }
+
+        // Extract brief description/notes - first paragraph or requirements
+        const notesMatch = text.match(/(?:description|about\s+(?:the\s+)?(?:role|job|position)|responsibilities|what\s+you'll\s+do)[:\s]*([^\n]+(?:\n[^\n]+)?)/i);
+        if (notesMatch) {
+            result.notes = notesMatch[1].trim().substring(0, 200);
+        } else if (lines.length > 2) {
+            // Get a meaningful line as notes
+            for (const line of lines.slice(2, 8)) {
+                if (line.length > 30 && line.length < 250) {
+                    result.notes = line.substring(0, 200);
+                    break;
+                }
+            }
+        }
+
+        return result;
+    }
+
+    openModalWithExtractedData(jobDetails, jobUrl) {
+        // Open the regular job modal
+        this.openModal();
+        
+        // Fill in the extracted data
+        document.getElementById('companyName').value = jobDetails.companyName || '';
+        document.getElementById('position').value = jobDetails.position || '';
+        document.getElementById('jobListing').value = jobUrl;
+        document.getElementById('salary').value = jobDetails.salary || '';
+        document.getElementById('location').value = jobDetails.location || '';
+        document.getElementById('email').value = jobDetails.email || '';
+        document.getElementById('phone').value = jobDetails.phone || '';
+        document.getElementById('notes').value = jobDetails.notes || '';
+        
+        // Set today's date as applied date
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('appliedDate').value = today;
+        
+        // Try to match platform
+        const platformSelect = document.getElementById('platform');
+        const detectedPlatform = (jobDetails.platform || '').toLowerCase();
+        
+        // Check common platforms
+        const platformMap = {
+            'indeed': 'indeed',
+            'linkedin': 'linkedin',
+            'glassdoor': 'glassdoor',
+            'ziprecruiter': 'ziprecruiter',
+            'monster': 'monster'
+        };
+        
+        let matched = false;
+        for (const [key, value] of Object.entries(platformMap)) {
+            if (detectedPlatform.includes(key)) {
+                platformSelect.value = value;
+                matched = true;
+                break;
+            }
+        }
+        
+        // If no match, add as custom platform
+        if (!matched && detectedPlatform) {
+            this.addPlatformToDropdown(detectedPlatform);
+            platformSelect.value = detectedPlatform;
+        }
+        
+        // Update modal title
+        document.getElementById('modalTitle').textContent = 'Add Job Application (Auto-filled)';
+    }
+
+    showQuickAddError(message) {
+        const errorDiv = document.getElementById('quickAddError');
+        errorDiv.textContent = message;
+        errorDiv.style.display = 'block';
+    }
+
+    hideQuickAddError() {
+        document.getElementById('quickAddError').style.display = 'none';
     }
 }
 

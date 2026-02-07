@@ -66,6 +66,16 @@ header h1 {
     background: #e0e0e0;
 }
 
+.btn-accent {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    color: white;
+}
+
+.btn-accent:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 20px rgba(245, 87, 108, 0.4);
+}
+
 .btn-danger {
     background: #ff4757;
     color: white;
@@ -531,6 +541,89 @@ header h1 {
 
 .btn-google-signin svg {
     flex-shrink: 0;
+}
+
+/* Quick Add Modal Styles */
+.quick-add-modal {
+    max-width: 600px;
+}
+
+.quick-add-modal textarea {
+    width: 100%;
+    resize: vertical;
+    min-height: 150px;
+    font-family: inherit;
+}
+
+.quick-add-description {
+    color: #666;
+    margin-bottom: 20px;
+    font-size: 14px;
+}
+
+.help-text {
+    display: block;
+    margin-top: 8px;
+    font-size: 12px;
+    color: #888;
+}
+
+.help-text a {
+    color: #667eea;
+    text-decoration: none;
+}
+
+.help-text a:hover {
+    text-decoration: underline;
+}
+
+.api-key-saved {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #d4edda;
+    padding: 12px 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    color: #155724;
+}
+
+.btn-link {
+    background: none;
+    border: none;
+    color: #667eea;
+    cursor: pointer;
+    font-size: 14px;
+    padding: 0;
+}
+
+.btn-link:hover {
+    text-decoration: underline;
+}
+
+.loading-indicator {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 20px;
+    color: #667eea;
+    font-weight: 500;
+}
+
+.spinner {
+    width: 24px;
+    height: 24px;
+    border: 3px solid #e0e0e0;
+    border-top-color: #667eea;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
 }
 
 /* Responsive Design */

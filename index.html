@@ -20,6 +20,7 @@
                 </div>
                 <button id="importBtn" class="btn btn-secondary">📥 Import XML</button>
                 <button id="exportBtn" class="btn btn-secondary">📤 Export to XML</button>
+                <button id="quickAddBtn" class="btn btn-accent">⚡ Quick Add</button>
                 <button id="addJobBtn" class="btn btn-primary">+ Add Job Application</button>
                 <input type="file" id="fileInput" accept=".xml" style="display: none;">
             </div>
@@ -169,6 +170,30 @@
                         <button type="submit" class="btn btn-primary">Save</button>
                     </div>
                 </form>
+            </div>
+        </div>
+
+        <!-- Quick Add Modal -->
+        <div id="quickAddModal" class="modal">
+            <div class="modal-content quick-add-modal">
+                <span class="close" id="quickAddModalClose">&times;</span>
+                <h2>⚡ Quick Add from Text</h2>
+                <p class="quick-add-description">Copy the job listing text from any website (LinkedIn, Indeed, etc.) and paste it below. We'll extract the details automatically.</p>
+                
+                <div class="form-group">
+                    <label for="jobText">Paste Job Listing Text</label>
+                    <textarea id="jobText" rows="8" placeholder="Copy and paste the job listing content here...
+Include job title, company name, location, salary, requirements, etc."></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="jobListingUrl">Job Listing URL (optional)</label>
+                    <input type="url" id="jobListingUrl" placeholder="https://linkedin.com/jobs/...">
+                </div>
+                <div id="quickAddError" class="auth-error" style="display: none;"></div>
+                <div class="form-actions">
+                    <button type="button" id="quickAddCancelBtn" class="btn btn-secondary">Cancel</button>
+                    <button type="button" id="extractJobBtn" class="btn btn-accent">🔍 Extract Details</button>
+                </div>
             </div>
         </div>
 
