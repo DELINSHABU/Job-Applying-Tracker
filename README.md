@@ -2,6 +2,18 @@
 
 A web-based application to track job applications with cloud storage and cross-device access.
 
+## Screenshots
+
+### Dashboard
+![Dashboard](screenshot/Screenshot%202026-02-10%20002453.png)
+
+The main dashboard displays all your job applications as cards with key information including company name, position, platform, location, salary, and application status. The top section shows real-time statistics for Total Applied, Pending, Callback, and Rejected applications. Use the search bar and filters to quickly find specific applications.
+
+### Add Job Application
+![Add Job Application](screenshot/Screenshot%202026-02-10%20002511.png)
+
+The Add Job Application form allows you to enter comprehensive details about each application including company information, job details, dates, and notes. Required fields are marked with an asterisk.
+
 ## Features
 
 ✨ **User Authentication**
