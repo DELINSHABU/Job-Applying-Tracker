@@ -1,5 +1,6 @@
 {
   "hosting": {
+    "site": "job-tracker-f18bc",
     "public": "dist",
     "ignore": [
       "firebase.json",

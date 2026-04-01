@@ -278,6 +278,34 @@ export function JobModal({ isOpen, onClose, onSave, job }: JobModalProps) {
             {/* Divider */}
             <div className="h-px bg-border dark:bg-border" />
 
+            {/* Contact Information Section */}
+            <section className="space-y-5">
+              <SectionHeader icon="contact_mail" iconColor="text-blue-500" title="Contact Information" />
+              
+              <FormInput
+                label="Email Address"
+                type="email"
+                icon="alternate_email"
+                iconColor="text-blue-500"
+                value={formData.email}
+                onChange={(e) => handleChange('email', e.target.value)}
+                placeholder="e.g. recruiter@company.com"
+              />
+
+              <FormInput
+                label="Phone Number"
+                type="tel"
+                icon="call"
+                iconColor="text-green-500"
+                value={formData.phone}
+                onChange={(e) => handleChange('phone', e.target.value)}
+                placeholder="e.g. +1 (555) 000-0000"
+              />
+            </section>
+
+            {/* Divider */}
+            <div className="h-px bg-border dark:bg-border" />
+
             {/* Important Dates Section */}
             <section className="space-y-5">
               <SectionHeader icon="calendar_today" iconColor="text-rose-400" title="Important Dates" />
