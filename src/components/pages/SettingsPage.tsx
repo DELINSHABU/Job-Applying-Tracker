@@ -1,5 +1,6 @@
 import { Button } from '../ui/button';
 import { useTheme } from '../../contexts/ThemeContext';
+import { usePWA } from '../../hooks/usePWA';
 import type { User, Job } from '../../types';
 
 interface SettingsPageProps {
@@ -12,6 +13,7 @@ interface SettingsPageProps {
 
 export function SettingsPage({ user, jobs, onLogout, onExport, onImport }: SettingsPageProps) {
   const { theme, toggleTheme } = useTheme();
+  const { isInstallable, isStandalone, installApp } = usePWA();
 
   const getInitials = (user: User | null) => {
     if (!user) return '?';
@@ -35,6 +37,7 @@ export function SettingsPage({ user, jobs, onLogout, onExport, onImport }: Setti
           variant="outline"
           size="icon"
           className="rounded-full bg-white dark:bg-card-bg border-slate-200 dark:border-card-border text-primary"
+          aria-label="Help"
         >
           <span className="material-icons-round leading-none">help_outline</span>
         </Button>
@@ -160,6 +163,30 @@ export function SettingsPage({ user, jobs, onLogout, onExport, onImport }: Setti
           </div>
         </div>
       </div>
+
+      {/* Install App Section */}
+      {!isStandalone && (
+        <div className="mb-8">
+          <Button
+            variant="outline"
+            onClick={installApp}
+            disabled={!isInstallable}
+            className={`w-full py-4 h-auto font-semibold rounded-xl active:scale-[0.98] flex items-center justify-center gap-2 transition-all ${
+              isInstallable 
+                ? "bg-primary/10 text-primary hover:bg-primary/20 border-primary/20" 
+                : "bg-slate-50 dark:bg-card-border/30 text-slate-400 dark:text-light-grey/40 border-slate-100 dark:border-card-border cursor-not-allowed"
+            }`}
+          >
+            <span className="material-icons-round text-xl">{isInstallable ? 'download' : 'sync'}</span>
+            {isInstallable ? 'Install as App' : 'Checking App Status...'}
+          </Button>
+          {!isInstallable && (
+            <p className="text-[10px] text-center mt-2 text-slate-400 dark:text-light-grey/50 px-4">
+              Your browser will enable installation once the app is fully verified.
+            </p>
+          )}
+        </div>
+      )}
 
       {/* Logout Section */}
       {user && (

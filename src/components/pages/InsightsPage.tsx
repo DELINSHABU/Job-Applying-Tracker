@@ -61,6 +61,7 @@ export function InsightsPage({ stats, jobs }: InsightsPageProps) {
           variant="outline"
           size="icon"
           className="w-10 h-10 rounded-full bg-white dark:bg-card-bg border-slate-200 dark:border-card-border text-primary"
+          aria-label="Refresh insights"
         >
           <span className="material-icons-round text-xl">sync</span>
         </Button>

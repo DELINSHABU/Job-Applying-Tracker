@@ -40,7 +40,7 @@ export function Sidebar({ activeTab, onTabChange }: SidebarProps) {
       </div>
 
       {/* Navigation */}
-      <nav className="space-y-2 flex-1">
+      <nav className="space-y-2 flex-1" aria-label="Main navigation">
         <NavItem
           icon="dashboard"
           label="Dashboard"

@@ -26,7 +26,7 @@ function NavItem({ icon, label, isActive, onClick }: NavItemProps) {
 
 export function BottomNav({ activeTab, onTabChange }: BottomNavProps) {
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-white/90 dark:bg-app-bg/90 backdrop-blur-xl border-t border-slate-200 dark:border-card-border px-6 py-3 flex justify-between items-center z-50">
+    <nav className="fixed bottom-0 left-0 right-0 bg-white/90 dark:bg-app-bg/90 backdrop-blur-xl border-t border-slate-200 dark:border-card-border px-6 py-3 flex justify-between items-center z-50" aria-label="Main navigation">
       <NavItem
         icon="dashboard"
         label="Dashboard"

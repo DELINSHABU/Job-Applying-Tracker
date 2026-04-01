@@ -33,10 +33,12 @@ export function DesktopHeader({
     <header className="h-20 border-b border-border bg-card/50 dark:bg-surface-container/50 backdrop-blur-md flex items-center justify-between px-8 shrink-0">
       {/* Search */}
       <div className="relative w-96">
+        <label htmlFor="desktop-search" className="sr-only">Search applications</label>
         <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-light-grey text-xl">
           search
         </span>
         <input
+          id="desktop-search"
           type="text"
           value={searchValue}
           onChange={(e) => onSearchChange(e.target.value)}
@@ -52,6 +54,7 @@ export function DesktopHeader({
           variant="outline"
           size="icon"
           className="w-10 h-10 rounded-full text-slate-500 dark:text-light-grey hover:bg-slate-100 dark:hover:bg-card-bg border-slate-200 dark:border-card-border"
+          aria-label="Notifications"
         >
           <span className="material-symbols-outlined">notifications</span>
         </Button>

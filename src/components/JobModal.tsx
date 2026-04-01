@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import {
@@ -8,6 +8,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { DeleteConfirmDialog } from './DeleteConfirmDialog';
 import type { Job, JobFormData, JobStatus, Platform } from '../types';
 
 interface JobModalProps {
@@ -15,6 +16,8 @@ interface JobModalProps {
   onClose: () => void;
   onSave: (data: JobFormData) => void;
   job?: Job | null;
+  customPlatforms?: string[];
+  onDeleteCustomPlatform?: (platform: string) => void;
 }
 
 const PLATFORMS: Platform[] = [
@@ -49,12 +52,14 @@ function FormInput({
   required, 
   icon, 
   iconColor,
+  rightElement,
   ...props 
 }: { 
   label: string; 
   required?: boolean; 
   icon?: string;
   iconColor?: string;
+  rightElement?: React.ReactNode;
 } & React.InputHTMLAttributes<HTMLInputElement>) {
   return (
     <div>
@@ -69,14 +74,19 @@ function FormInput({
         )}
         <input
           {...props}
-          className={`w-full bg-muted dark:bg-surface-container-high border border-input dark:border-border rounded-xl px-4 py-3.5 text-foreground dark:text-white placeholder:text-muted-foreground transition-all focus:ring-2 focus:ring-primary/40 focus:border-primary/50 outline-none ${icon ? 'pl-12' : ''} ${props.className || ''}`}
+          className={`w-full bg-muted dark:bg-surface-container-high border border-input dark:border-border rounded-xl px-4 py-3.5 text-foreground dark:text-white placeholder:text-muted-foreground transition-all focus:ring-2 focus:ring-primary/40 focus:border-primary/50 outline-none ${icon ? 'pl-12' : ''} ${rightElement ? 'pr-12' : ''} ${props.className || ''}`}
         />
+        {rightElement && (
+          <div className="absolute right-2 top-1/2 -translate-y-1/2">
+            {rightElement}
+          </div>
+        )}
       </div>
     </div>
   );
 }
 
-export function JobModal({ isOpen, onClose, onSave, job }: JobModalProps) {
+export function JobModal({ isOpen, onClose, onSave, job, customPlatforms = [], onDeleteCustomPlatform }: JobModalProps) {
   const [formData, setFormData] = useState<JobFormData>({
     companyName: '',
     position: '',
@@ -93,9 +103,24 @@ export function JobModal({ isOpen, onClose, onSave, job }: JobModalProps) {
     notes: '',
   });
 
+  const [isCustomPlatform, setIsCustomPlatform] = useState(false);
+  const [customPlatform, setCustomPlatform] = useState('');
+  const [showDeletePlatformConfirm, setShowDeletePlatformConfirm] = useState(false);
+  const [platformToDelete, setPlatformToDelete] = useState<string | null>(null);
+
+  // Combine predefined platforms with custom ones
+  const allPlatforms = useMemo(() => {
+    // Filter out any custom platforms that are already in predefined list
+    const uniqueCustom = customPlatforms.filter(p => !PLATFORMS.includes(p as any));
+    return [...PLATFORMS, ...uniqueCustom];
+  }, [customPlatforms]);
+
   // Reset form when modal opens/closes or job changes
   useEffect(() => {
     if (job) {
+      const isPredefined = PLATFORMS.includes(job.platform as any);
+      const isCustomInList = customPlatforms.includes(job.platform.toLowerCase());
+      
       setFormData({
         companyName: job.companyName,
         position: job.position,
@@ -111,6 +136,11 @@ export function JobModal({ isOpen, onClose, onSave, job }: JobModalProps) {
         status: job.status,
         notes: job.notes || '',
       });
+      
+      // Only show the custom input if it's NOT in either list
+      const shouldShowCustomInput = !isPredefined && !isCustomInList;
+      setIsCustomPlatform(shouldShowCustomInput);
+      setCustomPlatform(shouldShowCustomInput ? job.platform : '');
     } else {
       setFormData({
         companyName: '',
@@ -127,12 +157,18 @@ export function JobModal({ isOpen, onClose, onSave, job }: JobModalProps) {
         status: 'pending',
         notes: '',
       });
+      setIsCustomPlatform(false);
+      setCustomPlatform('');
     }
-  }, [job, isOpen]);
+  }, [job, isOpen, customPlatforms]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSave(formData);
+    const finalData = {
+      ...formData,
+      platform: isCustomPlatform ? customPlatform.trim() : formData.platform
+    };
+    onSave(finalData);
     onClose();
   };
 
@@ -140,103 +176,156 @@ export function JobModal({ isOpen, onClose, onSave, job }: JobModalProps) {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
+  const handleDeletePlatform = () => {
+    if (platformToDelete && onDeleteCustomPlatform) {
+      onDeleteCustomPlatform(platformToDelete);
+      if (formData.platform === platformToDelete) {
+        setFormData(prev => ({ ...prev, platform: 'linkedin' }));
+      }
+    }
+    setPlatformToDelete(null);
+    setShowDeletePlatformConfirm(false);
+  };
+
   return (
-    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="p-0 gap-0 max-w-lg max-h-[95vh] overflow-hidden flex flex-col bg-card dark:bg-popover border border-border dark:border-border">
-        {/* Header */}
-        <header className="sticky top-0 z-10 bg-card/80 dark:bg-popover/80 backdrop-blur-md border-b border-border dark:border-border px-4 py-3 flex items-center justify-between">
-          <button
-            type="button"
-            onClick={onClose}
-            className="p-2 -ml-2 text-slate-400 hover:text-slate-600 dark:hover:text-white transition-colors"
-          >
-            <span className="material-symbols-outlined">close</span>
-          </button>
-          <h1 className="text-lg font-semibold tracking-tight text-slate-900 dark:text-white">
-            {job ? 'Edit Application' : 'Add New Application'}
-          </h1>
-          <button
-            type="button"
-            onClick={handleSubmit}
-            className="text-primary font-semibold px-2 py-1 hover:text-primary/80 transition-colors"
-          >
-            Save
-          </button>
-        </header>
+    <>
+      <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+        <DialogContent className="p-0 gap-0 max-w-lg max-h-[95vh] overflow-hidden flex flex-col bg-card dark:bg-popover border border-border dark:border-border">
+          {/* Header */}
+          <header className="sticky top-0 z-10 bg-card/80 dark:bg-popover/80 backdrop-blur-md border-b border-border dark:border-border px-4 py-3 flex items-center justify-between">
+            <button
+              type="button"
+              onClick={onClose}
+              className="p-2 -ml-2 text-slate-400 hover:text-slate-600 dark:hover:text-white transition-colors"
+            >
+              <span className="material-symbols-outlined">close</span>
+            </button>
+            <h1 className="text-lg font-semibold tracking-tight text-slate-900 dark:text-white">
+              {job ? 'Edit Application' : 'Add New Application'}
+            </h1>
+            <button
+              type="button"
+              onClick={handleSubmit}
+              className="text-primary font-semibold px-2 py-1 hover:text-primary/80 transition-colors"
+            >
+              Save
+            </button>
+          </header>
 
-        {/* Form Content */}
-        <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto pb-28">
-          <div className="max-w-md mx-auto p-6 space-y-8">
-            {/* Job Details Section */}
-            <section className="space-y-5">
-              <SectionHeader icon="work" iconColor="text-blue-400" title="Job Details" />
-              
-              <FormInput
-                label="Position Title"
-                required
-                type="text"
-                value={formData.position}
-                onChange={(e) => handleChange('position', e.target.value)}
-                placeholder="e.g. Senior Product Designer"
-              />
+          {/* Form Content */}
+          <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto pb-28">
+            <div className="max-w-md mx-auto p-6 space-y-8">
+              {/* Job Details Section */}
+              <section className="space-y-5">
+                <SectionHeader icon="work" iconColor="text-blue-400" title="Job Details" />
+                
+                <FormInput
+                  label="Position Title"
+                  required
+                  type="text"
+                  value={formData.position}
+                  onChange={(e) => handleChange('position', e.target.value)}
+                  placeholder="e.g. Senior Product Designer"
+                />
 
-              <FormInput
-                label="Company Name"
-                required
-                type="text"
-                value={formData.companyName}
-                onChange={(e) => handleChange('companyName', e.target.value)}
-                placeholder="e.g. Google"
-              />
+                <FormInput
+                  label="Company Name"
+                  required
+                  type="text"
+                  value={formData.companyName}
+                  onChange={(e) => handleChange('companyName', e.target.value)}
+                  placeholder="e.g. Google"
+                />
 
-              <FormInput
-                label="Company Website"
-                type="url"
-                icon="language"
-                iconColor="text-blue-400"
-                value={formData.website || ''}
-                onChange={(e) => handleChange('website', e.target.value)}
-                placeholder="e.g. https://google.com"
-              />
+                <FormInput
+                  label="Company Website"
+                  type="url"
+                  icon="language"
+                  iconColor="text-blue-400"
+                  value={formData.website || ''}
+                  onChange={(e) => handleChange('website', e.target.value)}
+                  placeholder="e.g. https://google.com"
+                />
 
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-slate-600 dark:text-slate-300 mb-2">Platform</label>
-                  <Select
-                    value={formData.platform}
-                    onValueChange={(value) => handleChange('platform', value)}
-                  >
-                    <SelectTrigger className="w-full bg-muted dark:bg-surface-container-high border border-input dark:border-border rounded-xl h-[52px] text-foreground dark:text-white">
-                      <SelectValue placeholder="Select" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {PLATFORMS.map(p => (
-                        <SelectItem key={p} value={p}>
-                          {p.charAt(0).toUpperCase() + p.slice(1)}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-slate-600 dark:text-slate-300 mb-2">Platform</label>
+                      <Select
+                        value={isCustomPlatform ? 'other' : formData.platform}
+                        onValueChange={(value) => {
+                          if (value === 'other') {
+                            setIsCustomPlatform(true);
+                          } else {
+                            setIsCustomPlatform(false);
+                            handleChange('platform', value);
+                          }
+                        }}
+                      >
+                        <SelectTrigger className="w-full bg-muted dark:bg-surface-container-high border border-input dark:border-border rounded-xl h-[52px] text-foreground dark:text-white">
+                          <SelectValue placeholder="Select" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {allPlatforms.map(p => {
+                            const isPredefined = PLATFORMS.includes(p as any);
+                            return (
+                              <div key={p} className="flex items-center group">
+                                <SelectItem value={p} className="flex-1">
+                                  {p.charAt(0).toUpperCase() + p.slice(1)}
+                                </SelectItem>
+                                {!isPredefined && (
+                                  <button
+                                    type="button"
+                                    onClick={(e) => {
+                                      e.preventDefault();
+                                      e.stopPropagation();
+                                      setPlatformToDelete(p);
+                                      setShowDeletePlatformConfirm(true);
+                                    }}
+                                    className="p-1 mr-2 text-slate-400 hover:text-rose-500 opacity-0 group-hover:opacity-100 transition-opacity"
+                                  >
+                                    <span className="material-symbols-outlined text-sm">close</span>
+                                  </button>
+                                )}
+                              </div>
+                            );
+                          })}
+                          <SelectItem value="other">Other (Custom)</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    {isCustomPlatform && (
+                      <FormInput
+                        label="Platform Name"
+                        required
+                        type="text"
+                        value={customPlatform}
+                        onChange={(e) => setCustomPlatform(e.target.value)}
+                        placeholder="e.g. Wellfound, Otta..."
+                        autoFocus
+                      />
+                    )}
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-600 dark:text-slate-300 mb-2">Status</label>
+                    <Select
+                      value={formData.status}
+                      onValueChange={(value) => handleChange('status', value as JobStatus)}
+                    >
+                      <SelectTrigger className="w-full bg-muted dark:bg-surface-container-high border border-input dark:border-border rounded-xl h-[52px] text-foreground dark:text-white">
+                        <SelectValue placeholder="Select" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {STATUSES.map(s => (
+                          <SelectItem key={s} value={s}>
+                            {s.charAt(0).toUpperCase() + s.slice(1)}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-600 dark:text-slate-300 mb-2">Status</label>
-                  <Select
-                    value={formData.status}
-                    onValueChange={(value) => handleChange('status', value as JobStatus)}
-                  >
-                    <SelectTrigger className="w-full bg-muted dark:bg-surface-container-high border border-input dark:border-border rounded-xl h-[52px] text-foreground dark:text-white">
-                      <SelectValue placeholder="Select" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {STATUSES.map(s => (
-                        <SelectItem key={s} value={s}>
-                          {s.charAt(0).toUpperCase() + s.slice(1)}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
 
               <FormInput
                 label="Listing URL"
@@ -368,5 +457,14 @@ export function JobModal({ isOpen, onClose, onSave, job }: JobModalProps) {
         </div>
       </DialogContent>
     </Dialog>
+
+    <DeleteConfirmDialog
+      open={showDeletePlatformConfirm}
+      onOpenChange={setShowDeletePlatformConfirm}
+      onConfirm={handleDeletePlatform}
+      title="Delete Custom Platform"
+      description={`Are you sure you want to delete "${platformToDelete}" from your platform list?`}
+    />
+    </>
   );
 }

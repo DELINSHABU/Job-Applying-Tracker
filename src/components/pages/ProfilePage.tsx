@@ -59,6 +59,7 @@ export function ProfilePage({ user, jobs, onBack, onLogout }: ProfilePageProps) 
           size="icon"
           onClick={onBack}
           className="w-10 h-10 rounded-full bg-primary/10 text-primary hover:bg-primary/20"
+          aria-label="Go back"
         >
           <span className="material-icons-round">arrow_back_ios_new</span>
         </Button>

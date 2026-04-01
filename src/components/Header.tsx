@@ -36,6 +36,7 @@ export function Header({ user, onLoginClick, onProfileClick }: HeaderProps) {
             variant="outline"
             size="icon"
             className="rounded-full bg-white dark:bg-card-bg border-slate-200 dark:border-card-border hover:border-primary"
+            aria-label="Notifications"
           >
             <span className="material-icons-round text-xl text-slate-700 dark:text-off-white">notifications</span>
           </Button>

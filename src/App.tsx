@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, lazy, Suspense } from 'react';
 import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'motion/react';
 import { pageVariants, slideInRightVariants } from './lib/animations';
@@ -6,24 +6,38 @@ import { Header } from './components/Header';
 import { StatsCards } from './components/StatsCards';
 import { SearchBar } from './components/SearchBar';
 import { JobList } from './components/JobList';
-import { JobModal } from './components/JobModal';
-import { AuthModal } from './components/AuthModal';
 import { FloatingActionButton } from './components/FloatingActionButton';
 import { BottomNav } from './components/BottomNav';
 import { Sidebar } from './components/Sidebar';
 import { DesktopHeader } from './components/DesktopHeader';
 import { DesktopStatsCards } from './components/DesktopStatsCards';
-import { JobTable } from './components/JobTable';
-import { InsightsPage } from './components/pages/InsightsPage';
-import { JobDetailsPage } from './components/pages/JobDetailsPage';
-import { SettingsPage } from './components/pages/SettingsPage';
-import { ProfilePage } from './components/pages/ProfilePage';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { Toaster } from './components/ui/sonner';
 import { useAuth } from './hooks/useAuth';
 import { useJobs } from './hooks/useJobs';
 import { useSearch } from './hooks/useSearch';
+import { useCustomPlatforms } from './hooks/useCustomPlatforms';
 import type { Job, JobFormData, NavTab } from './types';
+
+// Lazy load page components (not needed on initial render)
+const InsightsPage = lazy(() => import('./components/pages/InsightsPage').then(m => ({ default: m.InsightsPage })));
+const JobDetailsPage = lazy(() => import('./components/pages/JobDetailsPage').then(m => ({ default: m.JobDetailsPage })));
+const SettingsPage = lazy(() => import('./components/pages/SettingsPage').then(m => ({ default: m.SettingsPage })));
+const ProfilePage = lazy(() => import('./components/pages/ProfilePage').then(m => ({ default: m.ProfilePage })));
+
+// Lazy load modals (only needed on user interaction)
+const JobModal = lazy(() => import('./components/JobModal').then(m => ({ default: m.JobModal })));
+const AuthModal = lazy(() => import('./components/AuthModal').then(m => ({ default: m.AuthModal })));
+const JobTable = lazy(() => import('./components/JobTable').then(m => ({ default: m.JobTable })));
+
+// Loading spinner for Suspense fallbacks
+function LoadingSpinner() {
+  return (
+    <div className="flex items-center justify-center py-12">
+      <div className="animate-spin rounded-full h-8 w-8 border-2 border-primary/20 border-b-primary"></div>
+    </div>
+  );
+}
 
 function App() {
   const [activeTab, setActiveTab] = useState<NavTab>('dashboard');
@@ -43,6 +57,13 @@ function App() {
     signOut,
     clearError: clearAuthError,
   } = useAuth();
+
+  // Custom Platforms persistence
+  const { 
+    customPlatforms, 
+    addCustomPlatform, 
+    removeCustomPlatform 
+  } = useCustomPlatforms();
 
   // Jobs state and actions
   const {
@@ -77,6 +98,16 @@ function App() {
   };
 
   const handleSaveJob = async (data: JobFormData) => {
+    // If it's a new custom platform, add it to our list
+    const predefinedPlatforms = [
+      'indeed', 'linkedin', 'glassdoor', 'ziprecruiter', 
+      'monster', 'whatsapp', 'email', 'direct', 'referral'
+    ];
+    const platform = data.platform.trim().toLowerCase();
+    if (platform && !predefinedPlatforms.includes(platform)) {
+      addCustomPlatform(platform);
+    }
+
     if (editingJob) {
       await updateJob(editingJob.id, data);
       toast.success('Application updated successfully');
@@ -425,9 +456,11 @@ function App() {
     <ThemeProvider>
       {/* Mobile Layout */}
       <div className={`lg:hidden min-h-screen bg-app-bg-light dark:bg-app-bg text-slate-900 dark:text-off-white font-display ${activeTab !== 'details' && activeTab !== 'profile' ? 'pb-24' : ''}`}>
-        <AnimatePresence mode="wait">
-          {renderMobileContent()}
-        </AnimatePresence>
+        <Suspense fallback={<LoadingSpinner />}>
+          <AnimatePresence mode="wait">
+            {renderMobileContent()}
+          </AnimatePresence>
+        </Suspense>
 
         {/* Bottom Navigation - hidden on detail and profile pages */}
         {activeTab !== 'details' && activeTab !== 'profile' && (
@@ -453,30 +486,37 @@ function App() {
 
           {/* Content Area */}
           <div className={`flex-1 overflow-y-auto hide-scrollbar ${activeTab === 'details' || activeTab === 'profile' ? '' : 'p-8'}`}>
-            <AnimatePresence mode="wait">
-              {renderDesktopContent()}
-            </AnimatePresence>
+            <Suspense fallback={<LoadingSpinner />}>
+              <AnimatePresence mode="wait">
+                {renderDesktopContent()}
+              </AnimatePresence>
+            </Suspense>
           </div>
         </main>
       </div>
 
-      {/* Job Modal */}
-      <JobModal
-        isOpen={isJobModalOpen}
-        onClose={() => setIsJobModalOpen(false)}
-        onSave={handleSaveJob}
-        job={editingJob}
-      />
+      {/* Lazy-loaded Modals */}
+      <Suspense fallback={null}>
+        {/* Job Modal */}
+        <JobModal
+          isOpen={isJobModalOpen}
+          onClose={() => setIsJobModalOpen(false)}
+          onSave={handleSaveJob}
+          job={editingJob}
+          customPlatforms={customPlatforms}
+          onDeleteCustomPlatform={removeCustomPlatform}
+        />
 
-      {/* Auth Modal */}
-      <AuthModal
-        isOpen={isAuthModalOpen}
-        onClose={handleAuthModalClose}
-        onSignIn={signIn}
-        onSignUp={signUp}
-        onGoogleSignIn={signInWithGoogle}
-        error={authError}
-      />
+        {/* Auth Modal */}
+        <AuthModal
+          isOpen={isAuthModalOpen}
+          onClose={handleAuthModalClose}
+          onSignIn={signIn}
+          onSignUp={signUp}
+          onGoogleSignIn={signInWithGoogle}
+          error={authError}
+        />
+      </Suspense>
 
       {/* Toast notifications */}
       <Toaster />

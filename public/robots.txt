@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://job-tracker-f18bc.web.app/sitemap.xml

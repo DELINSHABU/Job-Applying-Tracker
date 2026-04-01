@@ -15,12 +15,26 @@ After making code changes:
    C:\Users\celin\OneDrive\Documents\GitHub\Job-Applying-Tracker
    ```
 
-3. **Run the deploy command:**
+3. **Build the project first** (compiles your source code into `dist/`):
+   ```powershell
+   npm run build
+   ```
+
+4. **Then deploy to Firebase:**
    ```powershell
    firebase deploy --only hosting
    ```
 
-4. **Done!** Your site will update within a few seconds.
+   > ⚠️ **Important:** Always run `npm run build` before deploying!
+   > Firebase only uploads the `dist/` folder. If you skip the build step,
+   > your latest code changes will NOT appear on the live site.
+
+   Or run both steps in one command:
+   ```powershell
+   npm run build; firebase deploy --only hosting
+   ```
+
+5. **Done!** Your site will update within a few seconds.
 
 ## First-Time Setup (Already Completed)
 

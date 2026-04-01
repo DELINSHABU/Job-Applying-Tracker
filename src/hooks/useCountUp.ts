@@ -1,44 +1,63 @@
 import { useEffect, useRef, useState } from 'react';
-import gsap from 'gsap';
 
 interface UseCountUpOptions {
   duration?: number;
   delay?: number;
-  ease?: string;
 }
 
+/**
+ * Animates a number counting up from 0 to endValue.
+ * Uses requestAnimationFrame instead of GSAP for zero-dependency performance.
+ */
 export function useCountUp(
   endValue: number,
   options: UseCountUpOptions = {}
 ) {
-  const { duration = 0.8, delay = 0, ease = 'power2.out' } = options;
+  const { duration = 0.8, delay = 0 } = options;
   const [displayValue, setDisplayValue] = useState(0);
-  const valueRef = useRef({ value: 0 });
   const hasAnimated = useRef(false);
 
   useEffect(() => {
-    // Only animate once on mount or when endValue changes significantly
-    if (hasAnimated.current && Math.abs(valueRef.current.value - endValue) < 1) {
+    if (hasAnimated.current && displayValue === endValue) {
       return;
     }
 
-    const ctx = gsap.context(() => {
-      gsap.to(valueRef.current, {
-        value: endValue,
-        duration,
-        delay,
-        ease,
-        onUpdate: () => {
-          setDisplayValue(Math.round(valueRef.current.value));
-        },
-        onComplete: () => {
+    let animationFrameId: number;
+    let startTime: number | null = null;
+    const startValue = 0;
+
+    const delayMs = delay * 1000;
+    const durationMs = duration * 1000;
+
+    const timeoutId = setTimeout(() => {
+      const animate = (timestamp: number) => {
+        if (!startTime) startTime = timestamp;
+        const elapsed = timestamp - startTime;
+        const progress = Math.min(elapsed / durationMs, 1);
+
+        // Ease-out quadratic: decelerating to zero velocity
+        const easedProgress = 1 - (1 - progress) * (1 - progress);
+        const current = Math.round(startValue + (endValue - startValue) * easedProgress);
+        
+        setDisplayValue(current);
+
+        if (progress < 1) {
+          animationFrameId = requestAnimationFrame(animate);
+        } else {
           hasAnimated.current = true;
         }
-      });
-    });
+      };
 
-    return () => ctx.revert();
-  }, [endValue, duration, delay, ease]);
+      animationFrameId = requestAnimationFrame(animate);
+    }, delayMs);
+
+    return () => {
+      clearTimeout(timeoutId);
+      if (animationFrameId) {
+        cancelAnimationFrame(animationFrameId);
+      }
+    };
+  }, [endValue, duration, delay]);
 
   return displayValue;
 }
