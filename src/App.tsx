@@ -2,15 +2,7 @@ import { useState, lazy, Suspense } from 'react';
 import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'motion/react';
 import { pageVariants, slideInRightVariants } from './lib/animations';
-import { Header } from './components/Header';
-import { StatsCards } from './components/StatsCards';
-import { SearchBar } from './components/SearchBar';
-import { JobList } from './components/JobList';
-import { FloatingActionButton } from './components/FloatingActionButton';
-import { BottomNav } from './components/BottomNav';
-import { Sidebar } from './components/Sidebar';
-import { DesktopHeader } from './components/DesktopHeader';
-import { DesktopStatsCards } from './components/DesktopStatsCards';
+import { Header, StatsCards, SearchBar, JobList, FloatingActionButton, BottomNav, Sidebar, DesktopHeader, DesktopStatsCards, LoadingScreen } from './components';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { Toaster } from './components/ui/sonner';
 import { useAuth } from './hooks/useAuth';
@@ -216,13 +208,13 @@ function App() {
     clearAuthError();
   };
 
-  // Loading state
-  if (authLoading) {
+  // Initial loading state (auth + first fetch of jobs)
+  const isInitialLoading = authLoading || (user && jobsLoading && jobs.length === 0);
+
+  if (isInitialLoading) {
     return (
       <ThemeProvider>
-        <div className="min-h-screen bg-app-bg-light dark:bg-app-bg flex items-center justify-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-4 border-primary/20 border-b-primary"></div>
-        </div>
+        <LoadingScreen />
       </ThemeProvider>
     );
   }

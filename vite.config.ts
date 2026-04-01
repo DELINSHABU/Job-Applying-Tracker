@@ -58,7 +58,7 @@ export default defineConfig({
           {
             // NetworkFirst for navigation requests (as per user's PWA guide)
             urlPattern: ({ request }) => request.mode === 'navigate',
-            handler: 'NetworkFirst',
+            handler: 'StaleWhileRevalidate',
             options: {
               cacheName: 'pages-cache',
               expiration: {
@@ -142,7 +142,7 @@ export default defineConfig({
       output: {
         manualChunks(id) {
           if (!id.includes('node_modules')) return;
-          
+
           // React core
           if (id.includes('/react-dom/') || id.match(/\/react\/(?!dom)/)) {
             return 'vendor-react';
