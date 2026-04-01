@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Add New Application</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet"/>
+<script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              primary: "#6366f1",
+              "background-light": "#f8fafc",
+              "background-dark": "#0f172a",
+            },
+            fontFamily: {
+              display: ["Inter", "sans-serif"],
+            },
+            borderRadius: {
+              DEFAULT: "12px",
+            },
+          },
+        },
+      };
+    </script>
+<style>
+        body {
+            font-family: 'Inter', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }::-webkit-scrollbar {
+            width: 4px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 10px;
+        }.segmented-control {
+            background-color: rgba(118, 118, 128, 0.12);
+            padding: 2px;
+            border-radius: 9px;
+        }
+        .segmented-item {
+            padding: 6px 12px;
+            border-radius: 7px;
+            transition: all 0.2s ease;
+        }
+        .segmented-item.active {
+            background-color: white;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 min-h-screen flex flex-col">
+<header class="sticky top-0 z-50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 px-4 py-3 flex items-center justify-between">
+<button class="p-2 -ml-2 text-slate-500 dark:text-slate-400">
+<span class="material-icons-outlined">close</span>
+</button>
+<h1 class="text-lg font-semibold tracking-tight">Add New Application</h1>
+<button class="text-primary font-semibold px-2 py-1">Save</button>
+</header>
+<main class="flex-1 overflow-y-auto pb-24">
+<div class="max-w-md mx-auto p-5 space-y-8">
+<section class="space-y-4">
+<div class="flex items-center gap-2 mb-2">
+<span class="material-icons-outlined text-primary text-sm">work_outline</span>
+<h2 class="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">Job Details</h2>
+</div>
+<div class="space-y-5">
+<div>
+<label class="block text-sm font-medium text-slate-600 dark:text-slate-400 mb-1.5">Position Title *</label>
+<input class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all placeholder:text-slate-400" placeholder="e.g. Senior Product Designer" type="text"/>
+</div>
+<div>
+<label class="block text-sm font-medium text-slate-600 dark:text-slate-400 mb-1.5">Company Name *</label>
+<input class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all placeholder:text-slate-400" placeholder="e.g. Google" type="text"/>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<div>
+<label class="block text-sm font-medium text-slate-600 dark:text-slate-400 mb-1.5">Platform</label>
+<select class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all appearance-none text-slate-600 dark:text-slate-300">
+<option>LinkedIn</option>
+<option>Indeed</option>
+<option>Glassdoor</option>
+<option>Company Site</option>
+<option>Referral</option>
+</select>
+</div>
+<div>
+<label class="block text-sm font-medium text-slate-600 dark:text-slate-400 mb-1.5">Status</label>
+<select class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all appearance-none text-slate-600 dark:text-slate-300">
+<option>Pending</option>
+<option>Applied</option>
+<option>Interview</option>
+<option>Offer</option>
+<option>Rejected</option>
+</select>
+</div>
+</div>
+<div>
+<label class="block text-sm font-medium text-slate-600 dark:text-slate-400 mb-1.5">Listing URL</label>
+<div class="relative">
+<span class="absolute left-4 top-1/2 -translate-y-1/2 material-icons-outlined text-slate-400 text-base">link</span>
+<input class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl pl-11 pr-4 py-3 focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all placeholder:text-slate-400" placeholder="https://..." type="url"/>
+</div>
+</div>
+</div>
+</section>
+<div class="h-px bg-slate-200 dark:bg-slate-800"></div>
+<section class="space-y-4">
+<div class="flex items-center gap-2 mb-2">
+<span class="material-icons-outlined text-primary text-sm">payments</span>
+<h2 class="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">Compensation &amp; Location</h2>
+</div>
+<div class="grid grid-cols-1 gap-5">
+<div>
+<label class="block text-sm font-medium text-slate-600 dark:text-slate-400 mb-1.5">Salary Range</label>
+<input class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all placeholder:text-slate-400" placeholder="e.g. $120k - $150k" type="text"/>
+</div>
+<div>
+<label class="block text-sm font-medium text-slate-600 dark:text-slate-400 mb-1.5">Location</label>
+<div class="relative">
+<span class="absolute left-4 top-1/2 -translate-y-1/2 material-icons-outlined text-slate-400 text-base">place</span>
+<input class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl pl-11 pr-4 py-3 focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all placeholder:text-slate-400" placeholder="e.g. New York (Remote)" type="text"/>
+</div>
+</div>
+</div>
+</section>
+<div class="h-px bg-slate-200 dark:bg-slate-800"></div>
+<section class="space-y-4">
+<div class="flex items-center gap-2 mb-2">
+<span class="material-icons-outlined text-primary text-sm">calendar_today</span>
+<h2 class="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">Important Dates</h2>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<div>
+<label class="block text-sm font-medium text-slate-600 dark:text-slate-400 mb-1.5">Date Posted</label>
+<input class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all text-slate-600 dark:text-slate-300" type="date"/>
+</div>
+<div>
+<label class="block text-sm font-medium text-slate-600 dark:text-slate-400 mb-1.5">Date Applied</label>
+<input class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all text-slate-600 dark:text-slate-300" type="date"/>
+</div>
+</div>
+</section>
+<div class="h-px bg-slate-200 dark:bg-slate-800"></div>
+<section class="space-y-4">
+<div class="flex items-center gap-2 mb-2">
+<span class="material-icons-outlined text-primary text-sm">description</span>
+<h2 class="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">Notes</h2>
+</div>
+<textarea class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all placeholder:text-slate-400" placeholder="Mention key requirements, interview questions, or next steps..." rows="4"></textarea>
+</section>
+</div>
+</main>
+<div class="fixed bottom-0 left-0 right-0 p-5 bg-white/90 dark:bg-slate-900/90 backdrop-blur-lg border-t border-slate-200 dark:border-slate-800 flex gap-4">
+<button class="flex-1 py-4 px-6 text-slate-600 dark:text-slate-400 font-semibold rounded-2xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+            Cancel
+        </button>
+<button class="flex-[2] py-4 px-6 bg-primary text-white font-semibold rounded-2xl shadow-lg shadow-indigo-500/20 active:scale-95 transition-all">
+            Save Application
+        </button>
+</div>
+
+</body></html>

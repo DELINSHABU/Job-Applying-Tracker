@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#135bec",
+                        "app-bg": "#F8F9FA",
+                        "charcoal": "#1A1C1E",
+                    },
+                    fontFamily: {
+                        "display": ["Inter"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style type="text/tailwindcss">
+        body {
+            font-family: 'Inter', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+            background-color: theme('colors.app-bg');
+            color: theme('colors.charcoal');
+        }
+        .ios-blur {
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+        .card-shadow {
+            box-shadow: 0 2px 8px -2px rgba(0, 0, 0, 0.05), 0 1px 3px -1px rgba(0, 0, 0, 0.03);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="font-display min-h-screen pb-32">
+<nav class="sticky top-0 z-50 flex items-center justify-between px-6 py-4 bg-[#F8F9FA]/80 ios-blur">
+<button class="flex items-center justify-center w-10 h-10 rounded-full bg-white border border-slate-200 text-primary card-shadow">
+<span class="material-icons text-[20px]">arrow_back_ios_new</span>
+</button>
+<span class="text-xs font-bold tracking-widest uppercase text-slate-400">Application Details</span>
+<button class="flex items-center justify-center w-10 h-10 rounded-full bg-white border border-slate-200 text-primary card-shadow">
+<span class="material-icons text-[20px]">ios_share</span>
+</button>
+</nav>
+<main class="px-6 pt-4 space-y-8">
+<section class="flex flex-col items-center text-center space-y-4">
+<div class="relative">
+<div class="w-24 h-24 rounded-2xl bg-white shadow-sm flex items-center justify-center p-4 overflow-hidden border border-slate-200">
+<img alt="Company Logo" class="w-full h-full object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBg1ziOi61ZizjoNRYQbldCy0i0N2zfs0hXSTGaIf_z0-icdkEY5JfzKIQAqydGzTPIqAObdMQcGseseWZRHikazks4OU639CJ6BDqk9WZ4_JFoLjlRQL5L5UFwRfYFgn8t3lcs4LJIdPM-6YO1jSPRNHDm-zEYa8-nskHuXgJdXsAyuSve2kE-x8C-1C1qPnG6dc4KwaQl86IvQpglWHoLF6PqZPWWP8hl9fCoQDvrIqtS3drkNeC9LL1TAnHSjeft1712T9mwTTo"/>
+</div>
+<div class="absolute -bottom-1 -right-1 w-7 h-7 bg-green-500 border-4 border-[#F8F9FA] rounded-full"></div>
+</div>
+<div class="space-y-1">
+<h1 class="text-2xl font-bold tracking-tight text-charcoal">Senior Product Designer</h1>
+<p class="text-lg text-slate-500 font-medium">Stripe, Inc.</p>
+</div>
+<div class="inline-flex items-center px-4 py-1.5 rounded-full bg-purple-50 text-purple-600 border border-purple-100">
+<span class="w-2 h-2 rounded-full bg-purple-500 mr-2"></span>
+<span class="text-sm font-semibold tracking-wide">Interviewing</span>
+</div>
+</section>
+<section class="grid grid-cols-3 gap-3">
+<button class="flex flex-col items-center justify-center p-4 rounded-xl bg-white border border-slate-200/60 card-shadow active:scale-95 transition-transform group">
+<span class="material-icons text-primary mb-1">edit</span>
+<span class="text-xs font-semibold text-primary">Edit</span>
+</button>
+<button class="flex flex-col items-center justify-center p-4 rounded-xl bg-white border border-slate-200/60 card-shadow active:scale-95 transition-transform group">
+<span class="material-icons text-primary mb-1">sync_alt</span>
+<span class="text-xs font-semibold text-primary">Status</span>
+</button>
+<button class="flex flex-col items-center justify-center p-4 rounded-xl bg-white border border-slate-200/60 card-shadow active:scale-95 transition-transform group">
+<span class="material-icons text-primary mb-1">open_in_new</span>
+<span class="text-xs font-semibold text-primary">Job Link</span>
+</button>
+</section>
+<section class="space-y-3">
+<h3 class="text-[11px] font-bold text-slate-400 uppercase tracking-[0.15em] px-1">Job Info</h3>
+<div class="grid grid-cols-2 gap-3">
+<div class="p-4 rounded-xl bg-white border border-slate-200/60 card-shadow">
+<p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Salary Range</p>
+<p class="text-sm font-bold text-charcoal">$145k – $180k</p>
+</div>
+<div class="p-4 rounded-xl bg-white border border-slate-200/60 card-shadow">
+<p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Location</p>
+<p class="text-sm font-bold text-charcoal">Remote (USA)</p>
+</div>
+<div class="p-4 rounded-xl bg-white border border-slate-200/60 card-shadow">
+<p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Type</p>
+<p class="text-sm font-bold text-charcoal">Full-time</p>
+</div>
+<div class="p-4 rounded-xl bg-white border border-slate-200/60 card-shadow">
+<p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Cloud Sync</p>
+<div class="flex items-center text-primary">
+<span class="material-icons text-[14px] mr-1">cloud_done</span>
+<span class="text-[10px] font-bold uppercase">Synced</span>
+</div>
+</div>
+</div>
+</section>
+<section class="space-y-4">
+<h3 class="text-[11px] font-bold text-slate-400 uppercase tracking-[0.15em] px-1">Timeline</h3>
+<div class="space-y-0 relative">
+<div class="absolute left-4 top-2 bottom-2 w-[1.5px] bg-slate-200"></div>
+<div class="relative pl-10 pb-6">
+<div class="absolute left-2.5 top-1.5 w-3.5 h-3.5 rounded-full bg-primary ring-4 ring-[#F8F9FA]"></div>
+<div>
+<p class="text-sm font-bold text-charcoal">Technical Round Scheduled</p>
+<p class="text-xs text-slate-500 mt-0.5">Oct 28, 2023 • 2:30 PM</p>
+</div>
+</div>
+<div class="relative pl-10 pb-6">
+<div class="absolute left-2.5 top-1.5 w-3.5 h-3.5 rounded-full bg-slate-300 ring-4 ring-[#F8F9FA]"></div>
+<div>
+<p class="text-sm font-semibold text-charcoal/80">Phone Screening Passed</p>
+<p class="text-xs text-slate-400 mt-0.5">Oct 22, 2023 • 10:00 AM</p>
+</div>
+</div>
+<div class="relative pl-10">
+<div class="absolute left-2.5 top-1.5 w-3.5 h-3.5 rounded-full bg-slate-300 ring-4 ring-[#F8F9FA]"></div>
+<div>
+<p class="text-sm font-semibold text-charcoal/80">Application Submitted</p>
+<p class="text-xs text-slate-400 mt-0.5">Oct 15, 2023 • 4:15 PM</p>
+</div>
+</div>
+</div>
+</section>
+<section class="space-y-3">
+<div class="flex items-center justify-between px-1">
+<h3 class="text-[11px] font-bold text-slate-400 uppercase tracking-[0.15em]">Notes</h3>
+<span class="material-icons text-primary text-lg">edit_note</span>
+</div>
+<div class="p-5 rounded-xl bg-white border border-slate-200/60 card-shadow leading-relaxed text-sm text-slate-700 font-normal">
+                Spoke with Sarah from HR. The team is looking for someone with strong React and System Design skills. Next round will be a 90-minute technical interview focusing on real-time data visualization.
+            </div>
+</section>
+</main>
+<footer class="fixed bottom-0 left-0 right-0 p-6 pb-10 bg-gradient-to-t from-[#F8F9FA] via-[#F8F9FA]/95 to-transparent">
+<button class="w-full bg-primary hover:bg-primary/95 text-white font-bold py-4 rounded-2xl shadow-lg shadow-primary/20 flex items-center justify-center space-x-2 transition-all active:scale-[0.98]">
+<span class="material-icons">add_circle_outline</span>
+<span class="tracking-wide">Add Interview or Update</span>
+</button>
+<div class="h-1"></div>
+</footer>
+
+</body></html>

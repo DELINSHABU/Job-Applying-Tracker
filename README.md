@@ -1,158 +1,134 @@
-# Job Application Tracker
+# Job Tracker - React App
 
-A web-based application to track job applications with cloud storage and cross-device access.
-
-## Screenshots
-
-### Dashboard
-![Dashboard](screenshot/Screenshot%202026-02-10%20002453.png)
-
-The main dashboard displays all your job applications as cards with key information including company name, position, platform, location, salary, and application status. The top section shows real-time statistics for Total Applied, Pending, Callback, and Rejected applications. Use the search bar and filters to quickly find specific applications.
-
-### Add Job Application
-![Add Job Application](screenshot/Screenshot%202026-02-10%20002511.png)
-
-The Add Job Application form allows you to enter comprehensive details about each application including company information, job details, dates, and notes. Required fields are marked with an asterisk.
+A modern job application tracker built with React, TypeScript, Vite, and Tailwind CSS.
 
 ## Features
 
-✨ **User Authentication**
-- Sign up and login with email/password OR Google
-- Secure Firebase authentication
-- Personal accounts with private data
+- 🌙 **Dark Mode UI** - Modern mobile-first dark theme
+- 🔐 **Firebase Auth** - Email/password and Google sign-in
+- ☁️ **Cloud Sync** - Firestore for data persistence
+- 🔍 **Smart Search** - Filter by company, position, platform, status
+- 📊 **Dashboard Stats** - Track your application progress
+- 🎯 **Fit Scoring** - Score jobs based on your preferences
+- 🔄 **Duplicate Detection** - Automatically detect duplicate applications
+- ✅ **Type Safe** - Full TypeScript support
 
-☁️ **Cloud Storage**
-- Data stored in Firebase Firestore
-- Access your applications from any device
-- Automatic cloud sync
-- No data loss - everything is backed up
+## Tech Stack
 
-📋 **Job Tracking**
-- Track company names, positions, and contact information
-- Monitor application status (Pending, Callback, Replied, Rejected)
-- Record important dates and details
-- Add notes for each application
-- Filter and search functionality
+- **React 18** - UI framework
+- **Vite** - Build tool
+- **TypeScript** - Type safety
+- **Tailwind CSS** - Styling
+- **Firebase** - Auth & Firestore
+- **Jest** - Testing
 
-📊 **Dashboard**
-- Real-time statistics
-- Visual status indicators
-- Clean, modern interface
+## Getting Started
 
-💾 **Data Management**
-- Export to XML format for backup
-- Import XML to restore or transfer data
-- Duplicate detection on import
+### Prerequisites
 
-## Quick Start
+- Node.js 18+
+- npm or yarn
 
-### 1. Set Up Firebase
-
-Follow the detailed guide in [FIREBASE_SETUP.md](FIREBASE_SETUP.md) to:
-1. Create a Firebase project
-2. Enable Authentication and Firestore
-3. Configure your app with Firebase credentials
-
-### 2. Run the Application
-
-Serve the app over HTTP:
+### Installation
 
 ```bash
-# Using Python 3
-python3 -m http.server 8000
+# Install dependencies
+npm install
+
+# Start development server
+npm run dev
 ```
 
-Then open: `http://localhost:8000`
+### Running Tests
 
-### 3. Create an Account
+```bash
+# Run all tests
+npm test
 
-1. Click "🔐 Login / Sign Up"
-2. Choose your sign-in method:
-   - **Email/Password**: Switch to "Sign Up" tab and create account
-   - **Google Sign-In**: Click "Continue with Google"
-3. Start tracking your job applications!
+# Run tests in watch mode
+npm run test:watch
 
-## How It Works
-
-**User Authentication**
-- Each user creates their own account with email/password
-- All data is private and secure per user
-- Firebase handles authentication securely
-
-**Cloud Storage**
-- Job applications are stored in Firebase Firestore
-- Data structure: `users/{userId}/jobs/{jobId}`
-- Real-time sync across all devices
-- Secure access with Firestore rules
-
-**Cross-Device Access**
-- Login from any device with your credentials
-- All your data loads automatically
-- Changes sync instantly to the cloud
-
-## Technology Stack
-
-- **Frontend**: Vanilla JavaScript, HTML5, CSS3
-- **Authentication**: Firebase Authentication (Email/Password)
-- **Database**: Firebase Firestore (NoSQL)
-- **Hosting**: Self-hosted or Firebase Hosting
-
-## File Structure
-
-```
-├── index.html           # Main HTML file
-├── script.js            # Application logic
-├── styles.css           # Styling
-├── firebase-config.js   # Firebase configuration (you need to configure this)
-├── FIREBASE_SETUP.md    # Complete Firebase setup guide
-└── README.md            # This file
+# Run tests with coverage
+npm run test:coverage
 ```
 
-## Security
+### Building for Production
 
-- ✅ Email/password authentication
-- ✅ Firestore security rules ensure data privacy
-- ✅ Each user can only access their own data
-- ✅ Secure Firebase SDK implementation
-- ✅ No API keys exposed in client code (except Firebase public config)
-
-## Firestore Data Structure
-
-```
-users (collection)
-  └── {userId}
-      └── jobs (collection)
-          └── {jobId}
-              ├── companyName
-              ├── position
-              ├── status
-              ├── platform
-              ├── dates
-              └── ... (other fields)
+```bash
+npm run build
+npm run preview
 ```
 
-## Free Tier Usage
+## Project Structure
 
-Firebase offers a generous free tier that's more than enough for personal use:
-- **Authentication**: 50,000 monthly active users
-- **Firestore**: 50,000 reads/day, 20,000 writes/day, 1 GB storage
+```
+├── src/
+│   ├── __tests__/           # Jest tests
+│   │   ├── fitScoring.test.ts
+│   │   └── duplicateDetection.test.ts
+│   ├── components/          # React components
+│   │   ├── Header.tsx
+│   │   ├── StatsCards.tsx
+│   │   ├── BottomNav.tsx
+│   │   ├── SearchBar.tsx
+│   │   ├── FloatingActionButton.tsx
+│   │   ├── JobCard.tsx
+│   │   ├── JobList.tsx
+│   │   ├── JobModal.tsx
+│   │   └── AuthModal.tsx
+│   ├── hooks/               # Custom React hooks
+│   │   ├── useAuth.ts
+│   │   ├── useJobs.ts
+│   │   └── useSearch.ts
+│   ├── services/            # Business logic
+│   │   ├── firebase.ts
+│   │   ├── fitScoring.ts
+│   │   └── duplicateDetection.ts
+│   ├── types/               # TypeScript types
+│   │   └── index.ts
+│   ├── App.tsx              # Main app component
+│   ├── main.tsx             # Entry point
+│   └── index.css            # Global styles
+├── index.html
+├── package.json
+├── tailwind.config.js
+├── vite.config.ts
+├── tsconfig.json
+└── jest.config.js
+```
 
-You'll likely never exceed the free limits for personal job tracking.
+## Key Algorithms
 
-## Troubleshooting
+### Fit Scoring Engine
 
-See [FIREBASE_SETUP.md](FIREBASE_SETUP.md) for detailed troubleshooting steps.
+The fit scoring engine calculates how well a job matches your preferences:
 
-Common issues:
-- **"Firebase is not configured"**: Update `firebase-config.js` with your credentials
-- **Can't sign in**: Check Firebase Console → Authentication is enabled
-- **Google Sign-In fails**: See [GOOGLE_SIGNIN_TROUBLESHOOTING.md](GOOGLE_SIGNIN_TROUBLESHOOTING.md)
-- **Data not loading**: Verify Firestore rules are set up correctly
+- **Location Match** (0-25 points) - Remote preference, city matching
+- **Role Match** (0-25 points) - Position title similarity
+- **Salary Match** (0-25 points) - Salary range comparison
+- **Platform Match** (0-15 points) - Preferred job platforms
+- **Keyword Match** (0-10 points) - Important skills/keywords
 
-## Contributing
+### Duplicate Detection
 
-Feel free to fork and improve this project!
+The duplicate detection algorithm identifies potential duplicate applications:
+
+- **URL Matching** - Same job listing URL (100% confidence)
+- **Company + Position** - Same company and role (85-95% confidence)
+- **Fuzzy Matching** - Handles typos and variations in company names
+- **Abbreviation Expansion** - Sr. → Senior, Dev → Developer
+
+## Firebase Configuration
+
+The app uses Firebase for authentication and data storage. The configuration is in `src/services/firebase.ts`.
+
+To use your own Firebase project:
+
+1. Create a Firebase project at https://console.firebase.google.com
+2. Enable Email/Password and Google authentication
+3. Create a Firestore database
+4. Update the config in `firebase.ts`
 
 ## License
 
-MIT License - free to use for personal or commercial projects.
+MIT

@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Add New Application</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              primary: "#6366f1",
+              "midnight": "#0f111a",
+              "input-bg": "#1e212d",
+              "border-soft": "#2d3142",
+              "muted-blue": "#94a3b8"
+            },
+            fontFamily: {
+              display: ["Inter", "sans-serif"],
+            },
+            borderRadius: {
+              DEFAULT: "12px",
+            },
+          },
+        },
+      };
+    </script>
+<style type="text/tailwindcss">
+        body {
+            font-family: 'Inter', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+        ::-webkit-scrollbar {
+            width: 4px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #2d3142;
+            border-radius: 10px;
+        }
+        .form-input-focus:focus {
+            @apply ring-2 ring-primary/40 border-primary/50 outline-none;
+            box-shadow: 0 0 15px rgba(99, 102, 241, 0.15);
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-midnight text-white min-h-screen flex flex-col">
+<header class="sticky top-0 z-50 bg-midnight/80 backdrop-blur-md border-b border-white/5 px-4 py-3 flex items-center justify-between">
+<button class="p-2 -ml-2 text-slate-400">
+<span class="material-symbols-outlined">close</span>
+</button>
+<h1 class="text-lg font-semibold tracking-tight text-white">Add New Application</h1>
+<button class="text-primary font-semibold px-2 py-1">Save</button>
+</header>
+<main class="flex-1 overflow-y-auto pb-32">
+<div class="max-w-md mx-auto p-6 space-y-10">
+<section class="space-y-4">
+<div class="flex items-center gap-2 mb-3">
+<span class="material-symbols-outlined text-blue-400 text-xl">work</span>
+<h2 class="text-[11px] font-bold uppercase tracking-[0.1em] text-muted-blue">Job Details</h2>
+</div>
+<div class="space-y-5">
+<div>
+<label class="block text-sm font-medium text-slate-300 mb-2">Position Title *</label>
+<input class="w-full bg-input-bg border border-border-soft rounded-xl px-4 py-3.5 text-white placeholder:text-slate-500 transition-all form-input-focus" placeholder="e.g. Senior Product Designer" type="text"/>
+</div>
+<div>
+<label class="block text-sm font-medium text-slate-300 mb-2">Company Name *</label>
+<input class="w-full bg-input-bg border border-border-soft rounded-xl px-4 py-3.5 text-white placeholder:text-slate-500 transition-all form-input-focus" placeholder="e.g. Acme Corp" type="text"/>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<div>
+<label class="block text-sm font-medium text-slate-300 mb-2">Platform</label>
+<div class="relative">
+<select class="w-full bg-input-bg border border-border-soft rounded-xl px-4 py-3.5 text-white appearance-none transition-all form-input-focus">
+<option>LinkedIn</option>
+<option>Indeed</option>
+<option>Company Site</option>
+<option>Referral</option>
+</select>
+<span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none">expand_more</span>
+</div>
+</div>
+<div>
+<label class="block text-sm font-medium text-slate-300 mb-2">Status</label>
+<div class="relative">
+<select class="w-full bg-input-bg border border-border-soft rounded-xl px-4 py-3.5 text-white appearance-none transition-all form-input-focus">
+<option>Pending</option>
+<option>Applied</option>
+<option>Interview</option>
+<option>Offer</option>
+<option>Rejected</option>
+</select>
+<span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none">expand_more</span>
+</div>
+</div>
+</div>
+<div>
+<label class="block text-sm font-medium text-slate-300 mb-2">Listing URL</label>
+<div class="relative">
+<span class="absolute left-4 top-1/2 -translate-y-1/2 material-symbols-outlined text-purple-400 text-lg">link</span>
+<input class="w-full bg-input-bg border border-border-soft rounded-xl pl-12 pr-4 py-3.5 text-white placeholder:text-slate-500 transition-all form-input-focus" placeholder="https://..." type="url"/>
+</div>
+</div>
+</div>
+</section>
+<div class="h-px bg-white/5"></div>
+<section class="space-y-4">
+<div class="flex items-center gap-2 mb-3">
+<span class="material-symbols-outlined text-green-400 text-xl">payments</span>
+<h2 class="text-[11px] font-bold uppercase tracking-[0.1em] text-muted-blue">Compensation &amp; Location</h2>
+</div>
+<div class="grid grid-cols-1 gap-5">
+<div>
+<label class="block text-sm font-medium text-slate-300 mb-2">Salary Range</label>
+<input class="w-full bg-input-bg border border-border-soft rounded-xl px-4 py-3.5 text-white placeholder:text-slate-500 transition-all form-input-focus" placeholder="e.g. $120k - $150k" type="text"/>
+</div>
+<div>
+<label class="block text-sm font-medium text-slate-300 mb-2">Location</label>
+<div class="relative">
+<span class="absolute left-4 top-1/2 -translate-y-1/2 material-symbols-outlined text-orange-400 text-lg">location_on</span>
+<input class="w-full bg-input-bg border border-border-soft rounded-xl pl-12 pr-4 py-3.5 text-white placeholder:text-slate-500 transition-all form-input-focus" placeholder="e.g. New York (Remote)" type="text"/>
+</div>
+</div>
+</div>
+</section>
+<div class="h-px bg-white/5"></div>
+<section class="space-y-4">
+<div class="flex items-center gap-2 mb-3">
+<span class="material-symbols-outlined text-rose-400 text-xl">calendar_today</span>
+<h2 class="text-[11px] font-bold uppercase tracking-[0.1em] text-muted-blue">Important Dates</h2>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<div>
+<label class="block text-sm font-medium text-slate-300 mb-2">Date Posted</label>
+<input class="w-full bg-input-bg border border-border-soft rounded-xl px-4 py-3.5 text-white transition-all form-input-focus [color-scheme:dark]" type="date"/>
+</div>
+<div>
+<label class="block text-sm font-medium text-slate-300 mb-2">Date Applied</label>
+<input class="w-full bg-input-bg border border-border-soft rounded-xl px-4 py-3.5 text-white transition-all form-input-focus [color-scheme:dark]" type="date"/>
+</div>
+</div>
+</section>
+<div class="h-px bg-white/5"></div>
+<section class="space-y-4 pb-10">
+<div class="flex items-center gap-2 mb-3">
+<span class="material-symbols-outlined text-amber-400 text-xl">description</span>
+<h2 class="text-[11px] font-bold uppercase tracking-[0.1em] text-muted-blue">Notes</h2>
+</div>
+<textarea class="w-full bg-input-bg border border-border-soft rounded-xl px-4 py-3.5 text-white placeholder:text-slate-500 transition-all form-input-focus min-h-[140px]" placeholder="Mention key requirements, interview questions, or next steps..."></textarea>
+</section>
+</div>
+</main>
+<div class="fixed bottom-0 left-0 right-0 p-5 bg-midnight/95 backdrop-blur-xl border-t border-white/5 flex gap-4">
+<button class="flex-1 py-4 px-6 text-slate-400 font-semibold rounded-2xl active:bg-white/5 transition-colors">
+            Cancel
+        </button>
+<button class="flex-[2] py-4 px-6 bg-primary text-white font-semibold rounded-2xl shadow-lg shadow-primary/20 active:scale-[0.98] transition-all">
+            Save Application
+        </button>
+</div>
+
+</body></html>

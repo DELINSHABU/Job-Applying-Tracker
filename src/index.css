@@ -1,0 +1,197 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Import Inter font */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+/* Base styles */
+body {
+  font-family: 'Inter', sans-serif;
+  -webkit-tap-highlight-color: transparent;
+  min-height: 100vh;
+}
+
+/* Light mode default, dark mode when class is applied */
+body {
+  background-color: #F8FAFC;
+  color: #0f172a;
+}
+
+.dark body,
+body.dark {
+  background-color: #080C18;
+  color: #F5F5F5;
+}
+
+html.dark body {
+  background-color: #080C18;
+  color: #F5F5F5;
+}
+
+/* Glass card effect for desktop */
+.glass-card {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.05);
+}
+
+.dark .glass-card {
+  background: rgba(14, 21, 37, 0.8);
+  border: 1px solid rgba(139, 92, 246, 0.2);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+}
+
+/* Material Symbols Outlined settings */
+.material-symbols-outlined {
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+
+/* Hide scrollbar for stats cards */
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Custom scrollbar for modals */
+.modal-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.modal-scrollbar::-webkit-scrollbar-track {
+  background: #1E1E1E;
+}
+
+.modal-scrollbar::-webkit-scrollbar-thumb {
+  background: #2A2A2A;
+  border-radius: 3px;
+}
+
+.modal-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #3A3A3A;
+}
+
+/* Form input autofill styles */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+textarea:-webkit-autofill,
+textarea:-webkit-autofill:hover,
+textarea:-webkit-autofill:focus,
+select:-webkit-autofill,
+select:-webkit-autofill:hover,
+select:-webkit-autofill:focus {
+  -webkit-text-fill-color: hsl(var(--foreground));
+  -webkit-box-shadow: 0 0 0px 1000px hsl(var(--background)) inset;
+  transition: background-color 5000s ease-in-out 0s;
+}
+
+/* Smooth transitions */
+* {
+  transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+}
+
+/* Animation for loading spinner */
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+/* Focus ring styles */
+.focus-ring {
+  @apply focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-app-bg;
+}
+
+@layer base {
+  :root {
+    /* Light mode - Minimal Classic */
+    --background: 210 40% 98%; /* #F8FAFC - Gallery White */
+    --foreground: 222 47% 11%; /* slate-900 */
+    --card: 0 0% 100%; /* #FFFFFF - Card Surface */
+    --card-foreground: 222 47% 11%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
+    --primary: 239 84% 67%; /* #4F46E5 - Indigo */
+    --primary-foreground: 0 0% 100%; /* white */
+    --secondary: 210 40% 96%;
+    --secondary-foreground: 222 47% 11%;
+    --muted: 210 40% 96%;
+    --muted-foreground: 215 16% 47%;
+    --accent: 210 40% 96%;
+    --accent-foreground: 222 47% 11%;
+    --destructive: 0 84% 60%; /* #EF4444 - Danger */
+    --destructive-foreground: 0 0% 100%;
+    --border: 214 32% 91%;
+    --input: 214 32% 91%;
+    --ring: 239 84% 67%;
+    --chart-1: 239 84% 67%;
+    --chart-2: 160 60% 45%;
+    --chart-3: 30 80% 55%;
+    --chart-4: 280 65% 60%;
+    --chart-5: 340 75% 55%;
+    --radius: 0.75rem;
+
+    /* Surface containers for elevation */
+    --surface-container-lowest: 210 40% 98%;
+    --surface-container-low: 210 40% 96%;
+    --surface-container: 210 40% 94%;
+    --surface-container-high: 210 40% 92%;
+    --surface-container-highest: 210 40% 90%;
+
+    /* Semantic colors */
+    --success: 142 71% 45%; /* #22C55E */
+    --warning: 38 92% 50%; /* #F59E0B */
+    --danger: 0 84% 60%; /* #EF4444 */
+  }
+  .dark {
+    /* Dark mode - Mission Control */
+    --background: 222 47% 4%; /* #080C18 - Deep Space */
+    --foreground: 0 0% 96%; /* #F5F5F5 */
+    --card: 222 47% 6%; /* #0E1525 - Card Surface */
+    --card-foreground: 0 0% 96%;
+    --popover: 222 47% 8%; /* #131E30 - Elevated Surface */
+    --popover-foreground: 0 0% 96%;
+    --primary: 262 83% 58%; /* #8B5CF6 - AI Purple */
+    --primary-foreground: 0 0% 100%;
+    --secondary: 222 47% 8%;
+    --secondary-foreground: 0 0% 96%;
+    --muted: 222 47% 8%;
+    --muted-foreground: 215 16% 57%;
+    --accent: 222 47% 8%;
+    --accent-foreground: 0 0% 96%;
+    --destructive: 0 63% 50%; /* #EF4444 */
+    --destructive-foreground: 0 0% 100%;
+    --border: 222 47% 10%;
+    --input: 222 47% 10%;
+    --ring: 262 83% 58%; /* AI Purple */
+    --chart-1: 262 83% 58%; /* AI Purple */
+    --chart-2: 43 96% 56%; /* Gold #F59E0B */
+    --chart-3: 30 80% 55%;
+    --chart-4: 280 65% 60%;
+    --chart-5: 340 75% 55%;
+
+    /* Surface containers for elevation - Dark Mode */
+    --surface-container-lowest: 222 47% 4%; /* #080C18 */
+    --surface-container-low: 222 47% 5%; /* #0D1220 */
+    --surface-container: 222 47% 6%; /* #0E1525 */
+    --surface-container-high: 222 47% 8%; /* #131E30 */
+    --surface-container-highest: 222 47% 10%; /* #161F38 */
+
+    /* Semantic colors - Dark Mode */
+    --success: 160 84% 39%; /* #10B981 - Excellent Fit */
+    --warning: 38 92% 50%; /* #F59E0B - Good */
+    --danger: 0 84% 60%; /* #EF4444 - Poor */
+  }
+}

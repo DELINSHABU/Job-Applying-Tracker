@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Settings &amp; Data Management</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#135bec",
+                        "background-light": "#f6f6f8",
+                        "background-dark": "#101622",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            -webkit-tap-highlight-color: transparent;
+        }
+        .ios-toggle {
+            position: relative;
+            display: inline-block;
+            width: 44px;
+            height: 24px;
+        }
+        .ios-toggle input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #e5e7eb;
+            transition: .3s;
+            border-radius: 24px;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 20px;
+            width: 20px;
+            left: 2px;
+            bottom: 2px;
+            background-color: white;
+            transition: .3s;
+            border-radius: 50%;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        input:checked + .slider {
+            background-color: #135bec;
+        }
+        input:checked + .slider:before {
+            transform: translateX(20px);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 antialiased">
+<!-- Status Bar Spacer (iOS Style) -->
+<div class="h-12 w-full"></div>
+<main class="max-w-md mx-auto px-4 pb-20">
+<!-- Header -->
+<header class="flex items-center justify-between mb-8">
+<h1 class="text-2xl font-bold">Settings</h1>
+<button class="p-2 bg-white dark:bg-slate-800 rounded-full shadow-sm text-primary">
+<span class="material-icons-round leading-none">help_outline</span>
+</button>
+</header>
+<!-- Profile Section -->
+<div class="bg-white dark:bg-slate-800 rounded-xl p-5 mb-8 shadow-sm border border-slate-100 dark:border-slate-700/50 flex items-center gap-4">
+<div class="relative">
+<img alt="Profile Avatar" class="w-16 h-16 rounded-full object-cover border-2 border-primary/10" data-alt="Close up portrait of a smiling man" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA-x09LOCw_CJGV-V0Up4PVFWFapOynG0YMFrBUEq7CFQUXAvj4y9j7AWitYsmbUXfGxnIUXHLU80F27lT7qhYV5OlcWH1uQHQCP7x-NKHAyB85NwHmcJilSzJPHT-t8sNziqg0s0T3AZ1KkmlZ9li1inFYj3EZJ93o0tzk1QTfgqsPJFFVHGivHFXgNbmsRxA-ds35wK688GSuFqLfMsIcldt3PMR6tmw99pOL1mSCXu_YIObfIsX2KZRe5FmF6PVY622iU6a2hR0"/>
+<div class="absolute bottom-0 right-0 w-4 h-4 bg-green-500 border-2 border-white dark:border-slate-800 rounded-full"></div>
+</div>
+<div class="flex-1">
+<h2 class="text-lg font-bold leading-tight">Alex Johnson</h2>
+<p class="text-sm text-slate-500 dark:text-slate-400">alex.j@jobtracker.io</p>
+</div>
+<button class="text-primary font-semibold text-sm">Edit</button>
+</div>
+<!-- Account Group -->
+<div class="mb-8">
+<h3 class="px-1 mb-2 text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Account</h3>
+<div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700/50 overflow-hidden">
+<!-- Sync Status -->
+<div class="flex items-center justify-between p-4 border-b border-slate-50 dark:border-slate-700/50">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-lg bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center text-primary">
+<span class="material-icons-round text-[20px]">sync</span>
+</div>
+<span class="font-medium">Cloud Sync</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="text-xs text-slate-400 font-medium">Synced 2m ago</span>
+<div class="w-2 h-2 bg-green-500 rounded-full"></div>
+</div>
+</div>
+<!-- Change Password -->
+<button class="w-full flex items-center justify-between p-4 active:bg-slate-50 dark:active:bg-slate-700/50 transition-colors">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-lg bg-slate-50 dark:bg-slate-700/50 flex items-center justify-center text-slate-500">
+<span class="material-icons-round text-[20px]">lock_outline</span>
+</div>
+<span class="font-medium">Change Password</span>
+</div>
+<span class="material-icons-round text-slate-300 text-[20px]">chevron_right</span>
+</button>
+</div>
+</div>
+<!-- Data Management Group -->
+<div class="mb-8">
+<h3 class="px-1 mb-2 text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Data Management</h3>
+<div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700/50 overflow-hidden">
+<!-- Export -->
+<button class="w-full flex items-center justify-between p-4 border-b border-slate-50 dark:border-slate-700/50 active:bg-slate-50 dark:active:bg-slate-700/50 transition-colors text-left">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+<span class="material-icons-round text-[20px]">file_upload</span>
+</div>
+<div>
+<p class="font-medium leading-none mb-1">Export to XML</p>
+<p class="text-[11px] text-slate-400">Download your applications list</p>
+</div>
+</div>
+<span class="material-icons-round text-slate-300 text-[20px]">chevron_right</span>
+</button>
+<!-- Import -->
+<button class="w-full flex items-center justify-between p-4 border-b border-slate-50 dark:border-slate-700/50 active:bg-slate-50 dark:active:bg-slate-700/50 transition-colors text-left">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+<span class="material-icons-round text-[20px]">file_download</span>
+</div>
+<div>
+<p class="font-medium leading-none mb-1">Import XML</p>
+<p class="text-[11px] text-slate-400">Upload existing tracking data</p>
+</div>
+</div>
+<span class="material-icons-round text-slate-300 text-[20px]">chevron_right</span>
+</button>
+<!-- Backup -->
+<div class="flex items-center justify-between p-4 active:bg-slate-50 dark:active:bg-slate-700/50 transition-colors">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+<span class="material-icons-round text-[20px]">cloud_upload</span>
+</div>
+<span class="font-medium">Backup to Cloud</span>
+</div>
+<button class="px-3 py-1.5 bg-primary/10 text-primary text-xs font-bold rounded-full hover:bg-primary/20 transition-colors">BACKUP NOW</button>
+</div>
+</div>
+</div>
+<!-- Preferences Group -->
+<div class="mb-12">
+<h3 class="px-1 mb-2 text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Preferences</h3>
+<div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700/50 overflow-hidden">
+<!-- Dark Mode -->
+<div class="flex items-center justify-between p-4 border-b border-slate-50 dark:border-slate-700/50">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-lg bg-slate-900 flex items-center justify-center text-white">
+<span class="material-icons-round text-[18px]">dark_mode</span>
+</div>
+<span class="font-medium">Dark Mode</span>
+</div>
+<label class="ios-toggle">
+<input type="checkbox"/>
+<span class="slider"></span>
+</label>
+</div>
+<!-- Notifications -->
+<button class="w-full flex items-center justify-between p-4 active:bg-slate-50 dark:active:bg-slate-700/50 transition-colors">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-lg bg-orange-100 dark:bg-orange-900/20 flex items-center justify-center text-orange-600">
+<span class="material-icons-round text-[20px]">notifications_none</span>
+</div>
+<span class="font-medium">Notifications</span>
+</div>
+<span class="material-icons-round text-slate-300 text-[20px]">chevron_right</span>
+</button>
+</div>
+</div>
+<!-- Logout Section -->
+<div class="space-y-6">
+<button class="w-full py-4 bg-red-50 dark:bg-red-900/10 text-red-600 font-semibold rounded-xl active:scale-[0.98] transition-all flex items-center justify-center gap-2">
+<span class="material-icons-round text-[20px]">logout</span>
+                Sign Out
+            </button>
+<div class="text-center space-y-1">
+<p class="text-xs text-slate-400 dark:text-slate-500">Version 1.2.0 (Build 42)</p>
+<p class="text-[10px] text-slate-300 dark:text-slate-600">© 2024 Application Tracker Inc.</p>
+</div>
+</div>
+<!-- Bottom Tab Bar Placeholder (Visual only) -->
+<nav class="fixed bottom-0 left-0 right-0 bg-white/80 dark:bg-slate-900/80 backdrop-blur-lg border-t border-slate-100 dark:border-slate-800 px-6 py-3 flex justify-between items-center max-w-md mx-auto">
+<div class="flex flex-col items-center gap-1 text-slate-400">
+<span class="material-icons-round">grid_view</span>
+<span class="text-[10px] font-medium">Board</span>
+</div>
+<div class="flex flex-col items-center gap-1 text-slate-400">
+<span class="material-icons-round">analytics</span>
+<span class="text-[10px] font-medium">Stats</span>
+</div>
+<div class="flex flex-col items-center gap-1 text-primary">
+<span class="material-icons-round">settings</span>
+<span class="text-[10px] font-medium">Settings</span>
+</div>
+</nav>
+</main>
+<!-- Background Pattern -->
+<div class="fixed top-0 left-0 w-full h-full -z-10 pointer-events-none opacity-[0.03] dark:opacity-[0.05]" style="background-image: radial-gradient(circle at 2px 2px, #135bec 1px, transparent 0); background-size: 24px 24px;">
+</div>
+</body></html>

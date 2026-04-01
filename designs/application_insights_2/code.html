@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Application Insights - Dark Mode</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#38bdf8", // Neon Blue
+                        "background-main": "#0F172A", // Deep Slate
+                        "card-bg": "#1E293B", // Lighter Dark
+                        "accent-teal": "#2DD4BF",
+                        "accent-orange": "#FB923C",
+                        "accent-red": "#F87171",
+                    },
+                    fontFamily: {
+                        "display": ["Inter"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style type="text/tailwindcss">
+        body {
+            min-height: max(884px, 100dvh);
+        }
+        .text-off-white {
+            color: #F8FAFC;
+        }
+        .text-light-grey {
+            color: #94A3B8;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-main font-display text-off-white min-h-screen flex justify-center">
+<div class="w-full max-w-[430px] bg-background-main min-h-screen flex flex-col relative border-x border-slate-800/50">
+<div class="h-12 flex items-center justify-between px-8 pt-4 w-full">
+<span class="text-sm font-semibold text-off-white">9:41</span>
+<div class="flex items-center gap-1.5 text-off-white">
+<span class="material-icons text-[18px]">signal_cellular_alt</span>
+<span class="material-icons text-[18px]">wifi</span>
+<span class="material-icons text-[18px]">battery_full</span>
+</div>
+</div>
+<header class="flex items-center justify-between px-6 py-4 mt-2">
+<div>
+<h1 class="text-2xl font-bold tracking-tight text-off-white">Insights</h1>
+<p class="text-xs text-light-grey mt-0.5">Updated 2 mins ago • Cloud synced</p>
+</div>
+<button class="w-10 h-10 rounded-full bg-card-bg shadow-lg border border-slate-700/50 flex items-center justify-center text-primary">
+<span class="material-icons text-[20px]">sync</span>
+</button>
+</header>
+<main class="flex-1 overflow-y-auto px-6 pb-24 space-y-6">
+<div class="flex p-1 bg-slate-900/80 rounded-xl border border-slate-800">
+<button class="flex-1 py-2 text-xs font-bold rounded-lg bg-primary text-slate-900 shadow-sm">1M</button>
+<button class="flex-1 py-2 text-xs font-medium text-light-grey">3M</button>
+<button class="flex-1 py-2 text-xs font-medium text-light-grey">6M</button>
+<button class="flex-1 py-2 text-xs font-medium text-light-grey">ALL</button>
+</div>
+<section class="bg-card-bg rounded-2xl p-6 shadow-xl border border-slate-700/30 flex items-center justify-between">
+<div class="space-y-1">
+<span class="text-light-grey text-sm font-medium uppercase tracking-wider">Success Rate</span>
+<div class="text-4xl font-bold text-off-white">24.8%</div>
+<div class="flex items-center text-accent-teal text-xs font-semibold">
+<span class="material-icons text-sm mr-1">trending_up</span>
+                    +3.2% vs last month
+                </div>
+</div>
+<div class="relative flex items-center justify-center">
+<svg class="w-24 h-24 transform -rotate-90">
+<circle class="text-slate-800" cx="48" cy="48" fill="transparent" r="40" stroke="currentColor" stroke-width="8"></circle>
+<circle class="text-primary" cx="48" cy="48" fill="transparent" r="40" stroke="currentColor" stroke-dasharray="251.2" stroke-dashoffset="188.4" stroke-linecap="round" stroke-width="8"></circle>
+</svg>
+<span class="absolute text-primary text-[10px] font-black">INTERVIEW</span>
+</div>
+</section>
+<section class="bg-card-bg rounded-2xl p-6 shadow-xl border border-slate-700/30">
+<div class="flex items-center justify-between mb-6">
+<h3 class="font-bold text-off-white">Applications Trend</h3>
+<span class="material-icons text-slate-500">more_horiz</span>
+</div>
+<div class="h-40 flex items-end justify-between gap-2 px-1">
+<div class="flex-1 flex flex-col items-center gap-2">
+<div class="w-full bg-slate-800 rounded-t-md h-16 opacity-50"></div>
+<span class="text-[10px] font-medium text-light-grey">MAR</span>
+</div>
+<div class="flex-1 flex flex-col items-center gap-2">
+<div class="w-full bg-slate-800 rounded-t-md h-24 opacity-50"></div>
+<span class="text-[10px] font-medium text-light-grey">APR</span>
+</div>
+<div class="flex-1 flex flex-col items-center gap-2">
+<div class="w-full bg-slate-800 rounded-t-md h-20 opacity-50"></div>
+<span class="text-[10px] font-medium text-light-grey">MAY</span>
+</div>
+<div class="flex-1 flex flex-col items-center gap-2">
+<div class="w-full bg-primary shadow-[0_0_15px_rgba(56,189,248,0.3)] rounded-t-md h-32"></div>
+<span class="text-[10px] font-bold text-primary">JUN</span>
+</div>
+<div class="flex-1 flex flex-col items-center gap-2">
+<div class="w-full bg-slate-800 rounded-t-md h-28 opacity-50"></div>
+<span class="text-[10px] font-medium text-light-grey">JUL</span>
+</div>
+<div class="flex-1 flex flex-col items-center gap-2">
+<div class="w-full bg-slate-800 rounded-t-md h-22 opacity-50"></div>
+<span class="text-[10px] font-medium text-light-grey">AUG</span>
+</div>
+</div>
+</section>
+<section class="bg-card-bg rounded-2xl p-6 shadow-xl border border-slate-700/30">
+<h3 class="font-bold text-off-white mb-6">Application Status</h3>
+<div class="flex items-center gap-8">
+<div class="relative w-28 h-28">
+<svg class="w-full h-full transform -rotate-90">
+<circle cx="56" cy="56" fill="transparent" r="44" stroke="#38bdf8" stroke-dasharray="276" stroke-dashoffset="100" stroke-width="14"></circle>
+<circle cx="56" cy="56" fill="transparent" r="44" stroke="#2DD4BF" stroke-dasharray="276" stroke-dashoffset="240" stroke-width="14"></circle>
+<circle cx="56" cy="56" fill="transparent" r="44" stroke="#FB923C" stroke-dasharray="276" stroke-dashoffset="200" stroke-width="14"></circle>
+<circle cx="56" cy="56" fill="transparent" r="44" stroke="#F87171" stroke-dasharray="276" stroke-dashoffset="180" stroke-width="14"></circle>
+</svg>
+<div class="absolute inset-0 flex flex-col items-center justify-center">
+<span class="text-xl font-bold text-off-white">142</span>
+<span class="text-[9px] text-light-grey font-bold uppercase tracking-widest">Total</span>
+</div>
+</div>
+<div class="flex-1 space-y-3">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<div class="w-2.5 h-2.5 rounded-full bg-primary"></div>
+<span class="text-xs font-medium text-light-grey">Applied</span>
+</div>
+<span class="text-xs font-bold text-off-white">64</span>
+</div>
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<div class="w-2.5 h-2.5 rounded-full bg-accent-teal"></div>
+<span class="text-xs font-medium text-light-grey">Interview</span>
+</div>
+<span class="text-xs font-bold text-off-white">32</span>
+</div>
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<div class="w-2.5 h-2.5 rounded-full bg-accent-orange"></div>
+<span class="text-xs font-medium text-light-grey">Offers</span>
+</div>
+<span class="text-xs font-bold text-off-white">6</span>
+</div>
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<div class="w-2.5 h-2.5 rounded-full bg-accent-red"></div>
+<span class="text-xs font-medium text-light-grey">Rejected</span>
+</div>
+<span class="text-xs font-bold text-off-white">40</span>
+</div>
+</div>
+</div>
+</section>
+<section class="bg-card-bg rounded-2xl p-6 shadow-xl border border-slate-700/30">
+<h3 class="font-bold text-off-white mb-6">Top Success Platforms</h3>
+<div class="space-y-6">
+<div class="space-y-2">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<img class="w-6 h-6 rounded object-cover grayscale brightness-125" data-alt="LinkedIn logo icon" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBzm6rSpYGIiva1NIznCvTtTYv0LIZDplXvIf5YzF7QC9QOOL7JmsWju5VrzPUXIeCaBKim0Z88CsoPtMLhIVVCDzWqRIKTzKy1oEHMuVlN3JNoRR-uFZCbys1_6wCp7el-LS0_EV43B5aCYq9lOxPMXN5I0KO6YLIx8Ir-HopvprT4CYmw4S7fHLW7EM3wdSFGoCNAgn9bT1BXhPh3j0SuS8ZHSi-X78Oa6IvImPfQCJIhGGqnGAbWvVBkuI7XdIn6qMPpAOMTjJM"/>
+<span class="text-sm font-semibold text-off-white">LinkedIn</span>
+</div>
+<span class="text-xs font-medium text-accent-teal">42% Success</span>
+</div>
+<div class="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden">
+<div class="h-full bg-primary rounded-full w-[42%]"></div>
+</div>
+</div>
+<div class="space-y-2">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<img class="w-6 h-6 rounded object-cover grayscale brightness-125" data-alt="Indeed logo icon" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB8C-qSBtKkg42skpnsZXh53VAFmgCRZvUbfTprP2TSzTV5A9nROaR7xGhoYqLbjDJ-5OlcRFgj-1H5TCS_gDee2DuQyrGz9jmOQ8yk13CR71ln8zoSFvhdgQmD_lFJkcEPYwDIF7KcDfhT9cOCjtyLAcWAVqIWIBWvut6OlGbiYkMxsIRSM89YqZU6vFkdylAmLo9CNaf5aq6MiaGxBJDw-SWQ7i8_m6MmXE9BqYWRfDO90AqtVKPjequjpqmTlit6gQ2vikAB2hs"/>
+<span class="text-sm font-semibold text-off-white">Indeed</span>
+</div>
+<span class="text-xs font-medium text-accent-teal">28% Success</span>
+</div>
+<div class="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden">
+<div class="h-full bg-primary/60 rounded-full w-[28%]"></div>
+</div>
+</div>
+<div class="space-y-2">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<img class="w-6 h-6 rounded object-cover grayscale brightness-125" data-alt="Company direct website icon" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC4vyR92Ft44AfgOOyzXyr5d5GzEMjeULV14VrW4ChrXfsAZXheLJK5ZP_daY49GBVOiij5pEdj1E5wcktgGGjWTsXDXZnWVqmgTCFTPun2yvYpnc9CbSJ91drS_8s6SHL5xCn6KPjzDelaZ0MhykhAttfHtdxt24cLYrtrhbov_1ngEciDN7YwR8JqqLQMiiW2ocTL8GvCQc1XXp8IirvPF7iirKhmWtj5oXoO_xK6HqBlSsHLoCGW8jEdZ3XahRK8F62Ycrss09w"/>
+<span class="text-sm font-semibold text-off-white">Direct Referral</span>
+</div>
+<span class="text-xs font-medium text-accent-teal">18% Success</span>
+</div>
+<div class="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden">
+<div class="h-full bg-primary/30 rounded-full w-[18%]"></div>
+</div>
+</div>
+</div>
+</section>
+</main>
+<nav class="absolute bottom-0 left-0 right-0 bg-slate-900/90 backdrop-blur-xl border-t border-slate-800 h-20 px-10 flex items-start pt-3 justify-between">
+<div class="flex flex-col items-center gap-1 text-slate-500">
+<span class="material-icons text-[24px]">view_list</span>
+<span class="text-[10px] font-medium">Tracking</span>
+</div>
+<div class="flex flex-col items-center gap-1 text-primary">
+<span class="material-icons text-[24px]">analytics</span>
+<span class="text-[10px] font-bold">Insights</span>
+</div>
+<div class="flex flex-col items-center gap-1 text-slate-500">
+<span class="material-icons text-[24px]">explore</span>
+<span class="text-[10px] font-medium">Explore</span>
+</div>
+<div class="flex flex-col items-center gap-1 text-slate-500">
+<span class="material-icons text-[24px]">person</span>
+<span class="text-[10px] font-medium">Profile</span>
+</div>
+<div class="absolute bottom-1.5 left-1/2 -translate-x-1/2 w-32 h-1.5 bg-slate-800 rounded-full"></div>
+</nav>
+</div>
+
+</body></html>

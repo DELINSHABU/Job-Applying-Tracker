@@ -1,6 +1,14 @@
-# Firebase configuration - IMPORTANT: Keep your credentials private!
-# Uncomment the line below if you want to keep your Firebase config private
-# firebase-config.js
+# Dependencies
+node_modules
+
+# Build output
+dist
+dist-ssr
+
+# Environment
+.env
+.env.local
+.env.*.local
 
 # OS files
 .DS_Store
@@ -14,7 +22,14 @@ Thumbs.db
 
 # Logs
 *.log
+npm-debug.log*
 
 # Temporary files
 *.tmp
 *~
+
+# Testing
+coverage/
+
+# TypeScript cache
+*.tsbuildinfo
