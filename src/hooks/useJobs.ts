@@ -6,6 +6,7 @@ import type { Job, JobFormData, JobStats, DuplicateResult } from '../types';
 interface JobsState {
   jobs: Job[];
   loading: boolean;
+  initialized: boolean;
   error: string | null;
   stats: JobStats;
 }
@@ -22,6 +23,7 @@ interface JobsActions {
 export function useJobs(userId: string | null): JobsState & JobsActions {
   const [jobs, setJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState(false);
+  const [initialized, setInitialized] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   // Calculate stats
@@ -38,6 +40,7 @@ export function useJobs(userId: string | null): JobsState & JobsActions {
   const loadJobs = useCallback(async () => {
     if (!userId) {
       setJobs([]);
+      setInitialized(false);
       return;
     }
 
@@ -51,6 +54,7 @@ export function useJobs(userId: string | null): JobsState & JobsActions {
       setError('Failed to load jobs. Please try again.');
     } finally {
       setLoading(false);
+      setInitialized(true);
     }
   }, [userId]);
 
@@ -152,6 +156,7 @@ export function useJobs(userId: string | null): JobsState & JobsActions {
   return {
     jobs,
     loading,
+    initialized,
     error,
     stats,
     loadJobs,

@@ -61,6 +61,7 @@ function App() {
   const {
     jobs,
     loading: jobsLoading,
+    initialized: jobsInitialized,
     stats,
     addJob,
     updateJob,
@@ -209,15 +210,7 @@ function App() {
   };
 
   // Initial loading state (auth + first fetch of jobs)
-  const isInitialLoading = authLoading || (user && jobsLoading && jobs.length === 0);
-
-  if (isInitialLoading) {
-    return (
-      <ThemeProvider>
-        <LoadingScreen />
-      </ThemeProvider>
-    );
-  }
+  const isInitialLoading = authLoading || (user && !jobsInitialized);
 
   // Render mobile content based on active tab
   const renderMobileContent = () => {
@@ -446,72 +439,87 @@ function App() {
 
   return (
     <ThemeProvider>
-      {/* Mobile Layout */}
-      <div className={`lg:hidden min-h-screen bg-app-bg-light dark:bg-app-bg text-slate-900 dark:text-off-white font-display ${activeTab !== 'details' && activeTab !== 'profile' ? 'pb-24' : ''}`}>
-        <Suspense fallback={<LoadingSpinner />}>
-          <AnimatePresence mode="wait">
-            {renderMobileContent()}
-          </AnimatePresence>
-        </Suspense>
+      <AnimatePresence mode="wait">
+        {isInitialLoading ? (
+          <motion.div
+            key="loading-screen"
+            initial={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            <LoadingScreen />
+          </motion.div>
+        ) : (
+          <div key="main-app" className="contents">
+            {/* Mobile Layout */}
+            <div className={`lg:hidden min-h-screen bg-app-bg-light dark:bg-app-bg text-slate-900 dark:text-off-white font-display ${activeTab !== 'details' && activeTab !== 'profile' ? 'pb-24' : ''}`}>
+              <Suspense fallback={<LoadingSpinner />}>
+                <AnimatePresence mode="wait">
+                  {renderMobileContent()}
+                </AnimatePresence>
+              </Suspense>
 
-        {/* Bottom Navigation - hidden on detail and profile pages */}
-        {activeTab !== 'details' && activeTab !== 'profile' && (
-          <BottomNav activeTab={activeTab} onTabChange={setActiveTab} />
-        )}
-      </div>
+              {/* Bottom Navigation - hidden on detail and profile pages */}
+              {activeTab !== 'details' && activeTab !== 'profile' && (
+                <BottomNav activeTab={activeTab} onTabChange={setActiveTab} />
+              )}
+            </div>
 
-      {/* Desktop Layout */}
-      <div className="hidden lg:flex h-screen w-full bg-surface dark:bg-app-bg font-display overflow-hidden">
-        {/* Sidebar */}
-        <Sidebar activeTab={activeTab} onTabChange={setActiveTab} />
+            {/* Desktop Layout */}
+            <div className="hidden lg:flex h-screen w-full bg-surface dark:bg-app-bg font-display overflow-hidden">
+              {/* Sidebar */}
+              <Sidebar activeTab={activeTab} onTabChange={setActiveTab} />
 
-        {/* Main Content */}
-        <main className="flex-1 flex flex-col min-w-0 overflow-hidden">
-          {/* Desktop Header */}
-          <DesktopHeader
-            user={user}
-            searchValue={filters.search}
-            onSearchChange={setSearch}
-            onLoginClick={() => setIsAuthModalOpen(true)}
-            onProfileClick={handleProfileClick}
-          />
+              {/* Main Content */}
+              <main className="flex-1 flex flex-col min-w-0 overflow-hidden">
+                {/* Desktop Header */}
+                <DesktopHeader
+                  user={user}
+                  searchValue={filters.search}
+                  onSearchChange={setSearch}
+                  onLoginClick={() => setIsAuthModalOpen(true)}
+                  onProfileClick={handleProfileClick}
+                />
 
-          {/* Content Area */}
-          <div className={`flex-1 overflow-y-auto hide-scrollbar ${activeTab === 'details' || activeTab === 'profile' ? '' : 'p-8'}`}>
-            <Suspense fallback={<LoadingSpinner />}>
-              <AnimatePresence mode="wait">
-                {renderDesktopContent()}
-              </AnimatePresence>
+                {/* Content Area */}
+                <div className={`flex-1 overflow-y-auto hide-scrollbar ${activeTab === 'details' || activeTab === 'profile' ? '' : 'p-8'}`}>
+                  <Suspense fallback={<LoadingSpinner />}>
+                    <AnimatePresence mode="wait">
+                      {renderDesktopContent()}
+                    </AnimatePresence>
+                  </Suspense>
+                </div>
+              </main>
+            </div>
+
+            {/* Lazy-loaded Modals */}
+            <Suspense fallback={null}>
+              {/* Job Modal */}
+              <JobModal
+                isOpen={isJobModalOpen}
+                onClose={() => setIsJobModalOpen(false)}
+                onSave={handleSaveJob}
+                job={editingJob}
+                customPlatforms={customPlatforms}
+                onDeleteCustomPlatform={removeCustomPlatform}
+              />
+
+              {/* Auth Modal */}
+              <AuthModal
+                isOpen={isAuthModalOpen}
+                onClose={handleAuthModalClose}
+                onSignIn={signIn}
+                onSignUp={signUp}
+                onGoogleSignIn={signInWithGoogle}
+                error={authError}
+              />
             </Suspense>
+
+            {/* Toast notifications */}
+            <Toaster />
           </div>
-        </main>
-      </div>
-
-      {/* Lazy-loaded Modals */}
-      <Suspense fallback={null}>
-        {/* Job Modal */}
-        <JobModal
-          isOpen={isJobModalOpen}
-          onClose={() => setIsJobModalOpen(false)}
-          onSave={handleSaveJob}
-          job={editingJob}
-          customPlatforms={customPlatforms}
-          onDeleteCustomPlatform={removeCustomPlatform}
-        />
-
-        {/* Auth Modal */}
-        <AuthModal
-          isOpen={isAuthModalOpen}
-          onClose={handleAuthModalClose}
-          onSignIn={signIn}
-          onSignUp={signUp}
-          onGoogleSignIn={signInWithGoogle}
-          error={authError}
-        />
-      </Suspense>
-
-      {/* Toast notifications */}
-      <Toaster />
+        )}
+      </AnimatePresence>
     </ThemeProvider>
   );
 }
