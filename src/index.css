@@ -58,22 +58,29 @@ html.dark body {
   scrollbar-width: none;
 }
 
-/* Custom scrollbar for modals */
-.modal-scrollbar::-webkit-scrollbar {
+/* Global minimal scrollbar */
+::-webkit-scrollbar {
   width: 6px;
+  height: 6px;
 }
 
-.modal-scrollbar::-webkit-scrollbar-track {
-  background: #1E1E1E;
+::-webkit-scrollbar-track {
+  background: transparent;
 }
 
-.modal-scrollbar::-webkit-scrollbar-thumb {
-  background: #2A2A2A;
-  border-radius: 3px;
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--muted-foreground) / 0.3);
+  border-radius: 10px;
 }
 
-.modal-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: #3A3A3A;
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--muted-foreground) / 0.5);
+}
+
+/* Firefox support */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: hsl(var(--muted-foreground) / 0.3) transparent;
 }
 
 /* Form input autofill styles */

@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Job Tracker Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+<script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              primary: "#6366F1",
+              "background-light": "#F9FAFB",
+              "background-dark": "#111827",
+            },
+            fontFamily: {
+              display: ["Inter", "sans-serif"],
+            },
+            borderRadius: {
+              DEFAULT: "12px",
+            },
+          },
+        },
+      };
+    </script>
+<style>
+      body {
+        font-family: 'Inter', sans-serif;
+        -webkit-tap-highlight-color: transparent;
+      }
+      .hide-scrollbar::-webkit-scrollbar {
+        display: none;
+      }
+      .hide-scrollbar {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+      }
+    </style>
+<style>
+      body {
+        min-height: max(884px, 100dvh);
+      }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 min-h-screen pb-24">
+<header class="sticky top-0 z-30 bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-md px-5 pt-12 pb-4">
+<div class="flex justify-between items-center mb-6">
+<div>
+<h1 class="text-2xl font-bold tracking-tight">Job Tracker</h1>
+<p class="text-sm text-slate-500 dark:text-slate-400">Welcome back, Delin</p>
+</div>
+<div class="flex items-center gap-3">
+<button class="p-2 rounded-full bg-slate-200/50 dark:bg-slate-800 transition-colors">
+<span class="material-icons-round text-xl">notifications</span>
+</button>
+<div class="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white font-semibold">
+                    DS
+                </div>
+</div>
+</div>
+<!-- Daily Mission Section -->
+<div class="mb-6 bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-slate-100 dark:border-slate-700">
+<div class="flex justify-between items-center mb-4">
+<div class="flex items-center gap-2">
+<span class="material-icons-round text-orange-500">local_fire_department</span>
+<span class="text-sm font-bold">7 Day Streak!</span>
+</div>
+<button class="text-[11px] font-semibold text-primary uppercase tracking-wider hover:underline" onclick="document.getElementById('goal-modal').classList.remove('hidden')">Set Daily Goal</button>
+</div>
+<div class="space-y-4">
+<div>
+<div class="flex justify-between items-end mb-1.5">
+<span class="text-xs font-medium text-slate-600 dark:text-slate-400">Daily Mission</span>
+<span class="text-xs font-bold">4/10 <span class="font-normal text-slate-400">Applications</span></span>
+</div>
+<div class="w-full bg-slate-100 dark:bg-slate-700 h-2 rounded-full overflow-hidden">
+<div class="bg-primary h-full rounded-full" style="width: 40%"></div>
+</div>
+</div>
+<div class="flex items-center gap-4 pt-1">
+<div class="flex items-center gap-1.5">
+<div class="w-2 h-2 rounded-full bg-blue-500"></div>
+<span class="text-[11px] font-medium text-slate-500">LinkedIn: 2</span>
+</div>
+<div class="flex items-center gap-1.5">
+<div class="w-2 h-2 rounded-full bg-slate-400"></div>
+<span class="text-[11px] font-medium text-slate-500">Indeed: 1</span>
+</div>
+<div class="flex items-center gap-1.5">
+<div class="w-2 h-2 rounded-full bg-emerald-500"></div>
+<span class="text-[11px] font-medium text-slate-500">Direct: 1</span>
+</div>
+</div>
+</div>
+</div>
+<div class="flex gap-4 overflow-x-auto hide-scrollbar pb-2">
+<div class="min-w-[140px] bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700">
+<span class="text-primary material-icons-round mb-2">send</span>
+<div class="text-2xl font-bold">109</div>
+<div class="text-xs text-slate-500 dark:text-slate-400">Total Applied</div>
+</div>
+<div class="min-w-[140px] bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700">
+<span class="text-amber-500 material-icons-round mb-2">hourglass_empty</span>
+<div class="text-2xl font-bold">108</div>
+<div class="text-xs text-slate-500 dark:text-slate-400">Pending</div>
+</div>
+<div class="min-w-[140px] bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700">
+<span class="text-emerald-500 material-icons-round mb-2">chat_bubble_outline</span>
+<div class="text-2xl font-bold">12</div>
+<div class="text-xs text-slate-500 dark:text-slate-400">Interviews</div>
+</div>
+<div class="min-w-[140px] bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700">
+<span class="text-rose-500 material-icons-round mb-2">cancel</span>
+<div class="text-2xl font-bold">0</div>
+<div class="text-xs text-slate-500 dark:text-slate-400">Rejected</div>
+</div>
+</div>
+</header>
+<section class="px-5 mt-4 flex gap-3">
+<div class="relative flex-1">
+<span class="material-icons-round absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">search</span>
+<input class="w-full pl-10 pr-4 py-3 bg-white dark:bg-slate-800 border-none rounded-xl shadow-sm focus:ring-2 focus:ring-primary text-sm dark:text-white" placeholder="Search applications..." type="text"/>
+</div>
+<button class="bg-white dark:bg-slate-800 p-3 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700">
+<span class="material-icons-round text-slate-600 dark:text-slate-400">tune</span>
+</button>
+</section>
+<main class="px-5 mt-6 space-y-4">
+<div class="flex justify-between items-center mb-2">
+<h2 class="font-semibold text-lg">Recent Applications</h2>
+<button class="text-primary text-sm font-medium">View All</button>
+</div>
+<div class="bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700">
+<div class="flex justify-between items-start mb-3">
+<div class="flex gap-3">
+<div class="w-12 h-12 rounded-xl bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center">
+<span class="material-icons-round text-blue-600 dark:text-blue-400">business</span>
+</div>
+<div>
+<h3 class="font-bold text-slate-900 dark:text-white">Gulf Associates</h3>
+<p class="text-sm text-slate-500 dark:text-slate-400">Frontend Developer</p>
+</div>
+</div>
+<span class="px-3 py-1 bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 text-[10px] font-bold uppercase tracking-wider rounded-full">Pending</span>
+</div>
+<div class="grid grid-cols-2 gap-y-3 mt-4 border-t border-slate-50 dark:border-slate-700 pt-4">
+<div class="flex items-center gap-2 text-xs text-slate-600 dark:text-slate-400">
+<span class="material-icons-round text-sm">location_on</span>
+                    Abu Dhabi
+                </div>
+<div class="flex items-center gap-2 text-xs text-slate-600 dark:text-slate-400">
+<span class="material-icons-round text-sm">payments</span>
+                    $1,200 / mo
+                </div>
+<div class="flex items-center gap-2 text-xs text-slate-600 dark:text-slate-400">
+<span class="material-icons-round text-sm">calendar_today</span>
+                    Applied Feb 2
+                </div>
+<div class="flex items-center gap-2 text-xs text-slate-600 dark:text-slate-400">
+<span class="material-icons-round text-sm">link</span>
+                    LinkedIn
+                </div>
+</div>
+</div>
+<div class="bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700">
+<div class="flex justify-between items-start mb-3">
+<div class="flex gap-3">
+<div class="w-12 h-12 rounded-xl bg-purple-50 dark:bg-purple-900/30 flex items-center justify-center">
+<span class="material-icons-round text-purple-600 dark:text-purple-400">hub</span>
+</div>
+<div>
+<h3 class="font-bold text-slate-900 dark:text-white">Amicon Hub Services</h3>
+<p class="text-sm text-slate-500 dark:text-slate-400">Frontend Developer</p>
+</div>
+</div>
+<span class="px-3 py-1 bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 text-[10px] font-bold uppercase tracking-wider rounded-full">Pending</span>
+</div>
+<div class="grid grid-cols-2 gap-y-3 mt-4 border-t border-slate-50 dark:border-slate-700 pt-4">
+<div class="flex items-center gap-2 text-xs text-slate-600 dark:text-slate-400">
+<span class="material-icons-round text-sm">location_on</span>
+                    Dubai
+                </div>
+<div class="flex items-center gap-2 text-xs text-slate-600 dark:text-slate-400">
+<span class="material-icons-round text-sm">payments</span>
+                    N/A
+                </div>
+<div class="flex items-center gap-2 text-xs text-slate-600 dark:text-slate-400">
+<span class="material-icons-round text-sm">calendar_today</span>
+                    Applied Jan 26
+                </div>
+<div class="flex items-center gap-2 text-xs text-slate-600 dark:text-slate-400">
+<span class="material-icons-round text-sm">link</span>
+                    Indeed
+                </div>
+</div>
+</div>
+<div class="bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700">
+<div class="flex justify-between items-start mb-3">
+<div class="flex gap-3">
+<div class="w-12 h-12 rounded-xl bg-emerald-50 dark:bg-emerald-900/30 flex items-center justify-center">
+<span class="material-icons-round text-emerald-600 dark:text-emerald-400">psychology</span>
+</div>
+<div>
+<h3 class="font-bold text-slate-900 dark:text-white">eFinancialCareers</h3>
+<p class="text-sm text-slate-500 dark:text-slate-400">AI Software Engineer</p>
+</div>
+</div>
+<span class="px-3 py-1 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 text-[10px] font-bold uppercase tracking-wider rounded-full">Interviewing</span>
+</div>
+<div class="grid grid-cols-2 gap-y-3 mt-4 border-t border-slate-50 dark:border-slate-700 pt-4">
+<div class="flex items-center gap-2 text-xs text-slate-600 dark:text-slate-400">
+<span class="material-icons-round text-sm">location_on</span>
+                    Remote
+                </div>
+<div class="flex items-center gap-2 text-xs text-slate-600 dark:text-slate-400">
+<span class="material-icons-round text-sm">payments</span>
+                    $140k+
+                </div>
+<div class="flex items-center gap-2 text-xs text-slate-600 dark:text-slate-400">
+<span class="material-icons-round text-sm">calendar_today</span>
+                    Applied Feb 9
+                </div>
+<div class="flex items-center gap-2 text-xs text-slate-600 dark:text-slate-400">
+<span class="material-icons-round text-sm">link</span>
+                    Direct
+                </div>
+</div>
+</div>
+</main>
+<button class="fixed bottom-24 right-6 w-14 h-14 bg-primary text-white rounded-full shadow-lg shadow-primary/40 flex items-center justify-center transition-transform active:scale-90 z-40">
+<span class="material-icons-round text-3xl">add</span>
+</button>
+<nav class="fixed bottom-0 left-0 right-0 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-t border-slate-200 dark:border-slate-800 px-6 py-3 flex justify-between items-center z-50">
+<button class="flex flex-col items-center gap-1 text-primary">
+<span class="material-icons-round">dashboard</span>
+<span class="text-[10px] font-medium">Dashboard</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-slate-400 dark:text-slate-500">
+<span class="material-icons-round">work_outline</span>
+<span class="text-[10px] font-medium">Jobs</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-slate-400 dark:text-slate-500">
+<span class="material-icons-round">analytics</span>
+<span class="text-[10px] font-medium">Insights</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-slate-400 dark:text-slate-500">
+<span class="material-icons-round">settings</span>
+<span class="text-[10px] font-medium">Settings</span>
+</button>
+</nav>
+<!-- Goal Setting Modal -->
+<div class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-[70] flex items-end sm:items-center justify-center" id="goal-modal">
+<div class="bg-white dark:bg-slate-900 w-full max-w-md rounded-t-[32px] sm:rounded-[32px] p-8 shadow-2xl overflow-y-auto max-h-[90vh]">
+<div class="flex justify-between items-center mb-6">
+<h2 class="text-xl font-bold">Set Daily Goal</h2>
+<button class="p-2 rounded-full bg-slate-100 dark:bg-slate-800" onclick="document.getElementById('goal-modal').classList.add('hidden')">
+<span class="material-icons-round text-sm">close</span>
+</button>
+</div>
+<div class="space-y-6">
+<div class="space-y-3">
+<label class="text-sm font-semibold text-slate-700 dark:text-slate-300">How many applications today?</label>
+<input class="w-full h-2 bg-slate-100 dark:bg-slate-800 rounded-lg appearance-none cursor-pointer accent-primary" id="goal-range" max="20" min="1" type="range" value="10"/>
+<div class="flex justify-between text-xs text-slate-500">
+<span>1</span>
+<span class="font-bold text-primary text-base" id="goal-val">10</span>
+<span>20</span>
+</div>
+</div>
+<button class="w-full bg-primary text-white font-bold py-4 rounded-2xl shadow-lg shadow-primary/30" onclick="document.getElementById('goal-modal').classList.add('hidden')">
+                    Update Goal
+                </button>
+</div>
+</div>
+</div>
+<div class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-[60] flex items-end sm:items-center justify-center" id="modal">
+<div class="bg-white dark:bg-slate-900 w-full max-w-md rounded-t-[32px] sm:rounded-[32px] p-8 shadow-2xl transition-transform transform translate-y-0 overflow-y-auto max-h-[90vh]">
+<div class="flex justify-between items-center mb-6">
+<h2 class="text-xl font-bold">Add Job Application</h2>
+<button class="p-2 rounded-full bg-slate-100 dark:bg-slate-800" onclick="document.getElementById('modal').classList.add('hidden')">
+<span class="material-icons-round text-sm">close</span>
+</button>
+</div>
+<form class="space-y-4">
+<div class="space-y-1">
+<label class="text-xs font-semibold text-slate-500 dark:text-slate-400 ml-1">Company Name *</label>
+<input class="w-full p-3 bg-slate-50 dark:bg-slate-800 border-none rounded-xl focus:ring-2 focus:ring-primary text-sm" placeholder="e.g. Google" type="text"/>
+</div>
+<div class="space-y-1">
+<label class="text-xs font-semibold text-slate-500 dark:text-slate-400 ml-1">Position *</label>
+<input class="w-full p-3 bg-slate-50 dark:bg-slate-800 border-none rounded-xl focus:ring-2 focus:ring-primary text-sm" placeholder="e.g. Product Designer" type="text"/>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<div class="space-y-1">
+<label class="text-xs font-semibold text-slate-500 dark:text-slate-400 ml-1">Location</label>
+<input class="w-full p-3 bg-slate-50 dark:bg-slate-800 border-none rounded-xl focus:ring-2 focus:ring-primary text-sm" placeholder="Remote, NY" type="text"/>
+</div>
+<div class="space-y-1">
+<label class="text-xs font-semibold text-slate-500 dark:text-slate-400 ml-1">Salary</label>
+<input class="w-full p-3 bg-slate-50 dark:bg-slate-800 border-none rounded-xl focus:ring-2 focus:ring-primary text-sm" placeholder="$100k - $120k" type="text"/>
+</div>
+</div>
+<div class="space-y-1">
+<label class="text-xs font-semibold text-slate-500 dark:text-slate-400 ml-1">Status</label>
+<select class="w-full p-3 bg-slate-50 dark:bg-slate-800 border-none rounded-xl focus:ring-2 focus:ring-primary text-sm">
+<option>Pending</option>
+<option>Interviewing</option>
+<option>Offer</option>
+<option>Rejected</option>
+</select>
+</div>
+<div class="space-y-1">
+<label class="text-xs font-semibold text-slate-500 dark:text-slate-400 ml-1">Notes</label>
+<textarea class="w-full p-3 bg-slate-50 dark:bg-slate-800 border-none rounded-xl focus:ring-2 focus:ring-primary text-sm" placeholder="Add some details..." rows="3"></textarea>
+</div>
+<button class="w-full bg-primary text-white font-bold py-4 rounded-2xl mt-4 shadow-lg shadow-primary/30" type="button">
+                    Save Application
+                </button>
+</form>
+</div>
+</div>
+<script>
+        document.querySelector('.fixed.bottom-24').addEventListener('click', () => {
+            document.getElementById('modal').classList.remove('hidden');
+        });
+
+        const goalRange = document.getElementById('goal-range');
+        const goalVal = document.getElementById('goal-val');
+        if(goalRange && goalVal) {
+            goalRange.addEventListener('input', (e) => {
+                goalVal.textContent = e.target.value;
+            });
+        }
+    </script>
+</body></html>

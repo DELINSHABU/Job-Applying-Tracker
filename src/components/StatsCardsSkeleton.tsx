@@ -15,7 +15,7 @@ export function StatsCardSkeleton() {
 
 export function StatsCardsSkeleton() {
   return (
-    <div className="flex gap-4 overflow-x-auto hide-scrollbar pb-2 px-5">
+    <div className="flex gap-4 overflow-x-auto pb-2 px-5">
       {Array.from({ length: 4 }).map((_, i) => (
         <StatsCardSkeleton key={i} />
       ))}

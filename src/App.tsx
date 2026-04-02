@@ -1,14 +1,15 @@
-import { useState, lazy, Suspense } from 'react';
+import { useState, lazy, Suspense, useMemo } from 'react';
 import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'motion/react';
 import { pageVariants, slideInRightVariants } from './lib/animations';
-import { Header, StatsCards, SearchBar, JobList, FloatingActionButton, BottomNav, Sidebar, DesktopHeader, DesktopStatsCards, LoadingScreen } from './components';
+import { BottomNav, Sidebar, DesktopHeader, LoadingScreen } from './components';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { Toaster } from './components/ui/sonner';
 import { useAuth } from './hooks/useAuth';
 import { useJobs } from './hooks/useJobs';
 import { useSearch } from './hooks/useSearch';
 import { useCustomPlatforms } from './hooks/useCustomPlatforms';
+import { useDailyGoal } from './hooks/useDailyGoal';
 import type { Job, JobFormData, NavTab } from './types';
 
 // Lazy load page components (not needed on initial render)
@@ -16,11 +17,13 @@ const InsightsPage = lazy(() => import('./components/pages/InsightsPage').then(m
 const JobDetailsPage = lazy(() => import('./components/pages/JobDetailsPage').then(m => ({ default: m.JobDetailsPage })));
 const SettingsPage = lazy(() => import('./components/pages/SettingsPage').then(m => ({ default: m.SettingsPage })));
 const ProfilePage = lazy(() => import('./components/pages/ProfilePage').then(m => ({ default: m.ProfilePage })));
+const DashboardPage = lazy(() => import('./components/pages/DashboardPage').then(m => ({ default: m.DashboardPage })));
+const DashboardPageDesktop = lazy(() => import('./components/pages/DashboardPageDesktop').then(m => ({ default: m.DashboardPageDesktop })));
+const JobsPage = lazy(() => import('./components/pages/JobsPage').then(m => ({ default: m.JobsPage })));
 
 // Lazy load modals (only needed on user interaction)
 const JobModal = lazy(() => import('./components/JobModal').then(m => ({ default: m.JobModal })));
 const AuthModal = lazy(() => import('./components/AuthModal').then(m => ({ default: m.AuthModal })));
-const JobTable = lazy(() => import('./components/JobTable').then(m => ({ default: m.JobTable })));
 
 // Loading spinner for Suspense fallbacks
 function LoadingSpinner() {
@@ -74,6 +77,28 @@ function App() {
     filteredJobs,
     setSearch,
   } = useSearch(jobs);
+
+  // Calculate today's job count
+  const todayDate = new Date().toISOString().split('T')[0] ?? '';
+  const todayJobCount = useMemo(() => {
+    return jobs.filter(job => {
+      const appliedDate = job.appliedDate;
+      return appliedDate?.startsWith(todayDate);
+    }).length;
+  }, [jobs, todayDate]);
+
+  // Daily goal and streak
+  const {
+    dailyGoal,
+    streakData,
+    setDailyGoal: saveDailyGoal,
+  } = useDailyGoal(user?.uid || null, todayJobCount);
+
+  // Handler for setting daily goal
+  const handleSetDailyGoal = async (target: number) => {
+    await saveDailyGoal(target);
+    toast.success(`Daily goal set to ${target} applications!`);
+  };
 
   // Handlers
   const handleAddClick = () => {
@@ -274,44 +299,40 @@ function App() {
             />
           </motion.div>
         );
+      case 'jobs':
+        return (
+          <JobsPage
+            jobs={filteredJobs}
+            filters={filters}
+            onSearchChange={setSearch}
+            onEdit={handleEditJob}
+            onDelete={handleDeleteJob}
+            onView={handleViewJob}
+            onAddClick={handleAddClick}
+            loading={jobsLoading}
+          />
+        );
       case 'dashboard':
       default:
         return (
-          <motion.div
-            key="dashboard"
-            variants={pageVariants}
-            initial="initial"
-            animate="animate"
-            exit="exit"
-          >
-            {/* Header */}
-            <Header
-              user={user}
-              onLoginClick={() => setIsAuthModalOpen(true)}
-              onProfileClick={handleProfileClick}
-            />
-
-            {/* Stats Cards */}
-            <StatsCards stats={stats} />
-
-            {/* Search Bar */}
-            <SearchBar
-              value={filters.search}
-              onChange={setSearch}
-            />
-
-            {/* Job List */}
-            <JobList
-              jobs={filteredJobs}
-              onEdit={handleEditJob}
-              onDelete={handleDeleteJob}
-              onView={handleViewJob}
-              loading={jobsLoading}
-            />
-
-            {/* Floating Action Button */}
-            <FloatingActionButton onClick={handleAddClick} />
-          </motion.div>
+          <DashboardPage
+            user={user}
+            jobs={filteredJobs}
+            stats={stats}
+            filters={filters}
+            onSearchChange={setSearch}
+            onEdit={handleEditJob}
+            onDelete={handleDeleteJob}
+            onView={handleViewJob}
+            onLoginClick={() => setIsAuthModalOpen(true)}
+            onProfileClick={handleProfileClick}
+            onAddClick={handleAddClick}
+            loading={jobsLoading}
+            streakData={streakData}
+            dailyGoal={dailyGoal}
+            todayApplications={todayJobCount}
+            onSetDailyGoal={handleSetDailyGoal}
+          />
         );
     }
   };
@@ -390,49 +411,46 @@ function App() {
             />
           </motion.div>
         );
-      case 'dashboard':
-      default:
+      case 'jobs':
         return (
           <motion.div
-            key="desktop-dashboard"
+            key="desktop-jobs"
             variants={pageVariants}
             initial="initial"
             animate="animate"
             exit="exit"
-            className="space-y-8"
+            className="max-w-6xl mx-auto"
           >
-            {/* Dashboard Header */}
-            <div className="flex items-end justify-between">
-              <div>
-                <h2 className="text-3xl font-bold tracking-tight mb-1 text-slate-900 dark:text-off-white">Dashboard Overview</h2>
-                <p className="text-slate-500 dark:text-light-grey">
-                  {stats.interviewing + stats.callback > 0 
-                    ? `You have ${stats.interviewing + stats.callback} interviews scheduled.`
-                    : 'Track and manage your job applications.'
-                  }
-                </p>
-              </div>
-              <button 
-                onClick={handleAddClick}
-                className="px-5 py-2.5 bg-primary text-white font-semibold rounded-xl flex items-center gap-2 shadow-lg shadow-primary/25 hover:scale-[1.02] transition-transform"
-              >
-                <span className="material-symbols-outlined text-xl">add</span>
-                New Application
-              </button>
-            </div>
-
-            {/* Stats Cards */}
-            <DesktopStatsCards stats={stats} />
-
-            {/* Job Table */}
-            <JobTable
+            <JobsPage
               jobs={filteredJobs}
+              filters={filters}
+              onSearchChange={setSearch}
               onEdit={handleEditJob}
               onDelete={handleDeleteJob}
               onView={handleViewJob}
+              onAddClick={handleAddClick}
               loading={jobsLoading}
             />
           </motion.div>
+        );
+      case 'dashboard':
+      default:
+        return (
+          <DashboardPageDesktop
+            jobs={filteredJobs}
+            stats={stats}
+            filters={filters}
+            onSearchChange={setSearch}
+            onEdit={handleEditJob}
+            onDelete={handleDeleteJob}
+            onView={handleViewJob}
+            onAddClick={handleAddClick}
+            loading={jobsLoading}
+            streakData={streakData}
+            dailyGoal={dailyGoal}
+            todayApplications={todayJobCount}
+            onSetDailyGoal={handleSetDailyGoal}
+          />
         );
     }
   };
@@ -482,7 +500,7 @@ function App() {
                 />
 
                 {/* Content Area */}
-                <div className={`flex-1 overflow-y-auto hide-scrollbar ${activeTab === 'details' || activeTab === 'profile' ? '' : 'p-8'}`}>
+                <div className={`flex-1 overflow-y-auto ${activeTab === 'details' || activeTab === 'profile' ? '' : 'p-8'}`}>
                   <Suspense fallback={<LoadingSpinner />}>
                     <AnimatePresence mode="wait">
                       {renderDesktopContent()}

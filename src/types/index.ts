@@ -179,3 +179,19 @@ export const DEFAULT_PROFILE: Omit<UserProfile, 'createdAt' | 'updatedAt'> = {
   aiProvider: 'gemini',
   onboardingComplete: false,
 };
+
+// Daily goal and streak tracking
+export interface DailyGoal {
+  id: string;
+  userId: string;
+  targetApplications: number;
+  currentApplications: number;
+  date: string; // YYYY-MM-DD format
+  completed: boolean;
+}
+
+export interface StreakData {
+  currentStreak: number;
+  longestStreak: number;
+  lastCompletedDate: string | null; // YYYY-MM-DD format
+}

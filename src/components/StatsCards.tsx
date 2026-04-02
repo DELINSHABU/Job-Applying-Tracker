@@ -35,7 +35,7 @@ function StatCard({ icon, iconColor, value, label, delay = 0 }: StatCardProps) {
 export function StatsCards({ stats }: StatsCardsProps) {
   return (
     <motion.div 
-      className="flex gap-4 overflow-x-auto hide-scrollbar pb-2 px-5"
+      className="flex gap-4 overflow-x-auto pb-2 px-5"
       variants={staggerContainerVariants}
       initial="initial"
       animate="animate"
