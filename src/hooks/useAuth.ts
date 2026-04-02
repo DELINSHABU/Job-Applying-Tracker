@@ -21,8 +21,16 @@ export function useAuth(): AuthState & AuthActions {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Listen to auth state changes
+  // Listen to auth state changes and handle redirect results
   useEffect(() => {
+    // Check for redirect results first
+    authService.handleRedirectResult().catch((err) => {
+      const errorCode = (err as { code?: string }).code || '';
+      if (errorCode && errorCode !== 'auth/popup-closed-by-user') {
+        setError(getAuthErrorMessage(errorCode));
+      }
+    });
+
     const unsubscribe = authService.onAuthStateChange((user) => {
       setUser(user);
       setLoading(false);

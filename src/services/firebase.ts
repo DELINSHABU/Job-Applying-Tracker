@@ -4,6 +4,8 @@ import {
   signInWithEmailAndPassword, 
   createUserWithEmailAndPassword,
   signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
   GoogleAuthProvider,
   signOut,
   onAuthStateChanged,
@@ -64,9 +66,36 @@ export const authService = {
   },
 
   // Sign in with Google
-  signInWithGoogle: async (): Promise<User> => {
-    const result = await signInWithPopup(auth, googleProvider);
-    return toUser(result.user);
+  signInWithGoogle: async (): Promise<User | void> => {
+    try {
+      // Check if we are in a standalone/PWA environment
+      const isStandalone = window.matchMedia('(display-mode: standalone)').matches || (window.navigator as any).standalone;
+      
+      if (isStandalone) {
+        // Use redirect in standalone mode for better experience
+        return await signInWithRedirect(auth, googleProvider);
+      }
+      
+      const result = await signInWithPopup(auth, googleProvider);
+      return toUser(result.user);
+    } catch (error: any) {
+      if (error.code === 'auth/popup-blocked') {
+        // Fallback to redirect if popup is blocked
+        return await signInWithRedirect(auth, googleProvider);
+      }
+      throw error;
+    }
+  },
+
+  // Handle result from redirect sign-in
+  handleRedirectResult: async (): Promise<User | null> => {
+    try {
+      const result = await getRedirectResult(auth);
+      return result ? toUser(result.user) : null;
+    } catch (error) {
+      console.error('Error handling redirect result:', error);
+      throw error;
+    }
   },
 
   // Sign out

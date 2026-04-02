@@ -55,11 +55,13 @@ export default defineConfig({
       workbox: {
         // Precache all built assets
         globPatterns: ['**/*.{js,css,html,svg,png,ico,woff,woff2}'],
+        // Exclude Firebase Auth reserved paths from Service Worker
+        navigateFallbackDenylist: [/^\/__/],
         // Runtime caching strategies
         runtimeCaching: [
           {
-            // NetworkFirst for navigation requests (as per user's PWA guide)
-            urlPattern: ({ request }) => request.mode === 'navigate',
+            // StaleWhileRevalidate for navigation requests, excluding Firebase reserved paths
+            urlPattern: ({ request, url }) => request.mode === 'navigate' && !url.pathname.startsWith('/__'),
             handler: 'StaleWhileRevalidate',
             options: {
               cacheName: 'pages-cache',

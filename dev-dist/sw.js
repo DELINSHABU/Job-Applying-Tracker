@@ -85,15 +85,17 @@ define(['./workbox-2ca69044'], (function (workbox) { 'use strict';
     "revision": "3ca0b8505b4bec776b69afdba2768812"
   }, {
     "url": "index.html",
-    "revision": "0.gsd99r068do"
+    "revision": "0.av9hb9kmge"
   }], {});
   workbox.cleanupOutdatedCaches();
   workbox.registerRoute(new workbox.NavigationRoute(workbox.createHandlerBoundToURL("index.html"), {
-    allowlist: [/^\/$/]
+    allowlist: [/^\/$/],
+    denylist: [/^\/__/]
   }));
   workbox.registerRoute(({
-    request
-  }) => request.mode === "navigate", new workbox.StaleWhileRevalidate({
+    request,
+    url
+  }) => request.mode === "navigate" && !url.pathname.startsWith("/__"), new workbox.StaleWhileRevalidate({
     "cacheName": "pages-cache",
     plugins: [new workbox.ExpirationPlugin({
       maxEntries: 50,
