@@ -11,6 +11,10 @@ const Toaster = ({ ...props }: ToasterProps) => {
       theme={theme as ToasterProps["theme"]}
       className="toaster group"
       position="top-center"
+      closeButton
+      expand={true}
+      richColors
+      visibleToasts={9}
       toastOptions={{
         classNames: {
           toast:

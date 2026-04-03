@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { jobsService } from '../services/firebase';
 import { detectDuplicate } from '../services/duplicateDetection';
 import type { Job, JobFormData, JobStats, DuplicateResult } from '../types';
@@ -13,7 +13,7 @@ interface JobsState {
 
 interface JobsActions {
   loadJobs: () => Promise<void>;
-  addJob: (data: JobFormData) => Promise<DuplicateResult | null>;
+  addJob: (data: JobFormData, skipDuplicateCheck?: boolean) => Promise<DuplicateResult | null>;
   updateJob: (id: string, data: JobFormData) => Promise<void>;
   deleteJob: (id: string) => Promise<void>;
   checkDuplicate: (data: Partial<JobFormData>) => DuplicateResult;
@@ -26,15 +26,25 @@ export function useJobs(userId: string | null): JobsState & JobsActions {
   const [initialized, setInitialized] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Calculate stats
-  const stats: JobStats = {
-    total: jobs.length,
-    pending: jobs.filter(j => j.status === 'pending').length,
-    callback: jobs.filter(j => j.status === 'callback').length,
-    interviewing: jobs.filter(j => j.status === 'interviewing').length,
-    rejected: jobs.filter(j => j.status === 'rejected').length,
-    offer: jobs.filter(j => j.status === 'offer').length,
-  };
+  // Calculate stats - single pass with useMemo for O(n) performance
+  const stats: JobStats = useMemo(() => {
+    const counts = {
+      total: jobs.length,
+      pending: 0,
+      callback: 0,
+      interviewing: 0,
+      rejected: 0,
+      offer: 0,
+    };
+    for (const job of jobs) {
+      if (job.status === 'pending') counts.pending++;
+      else if (job.status === 'callback') counts.callback++;
+      else if (job.status === 'interviewing') counts.interviewing++;
+      else if (job.status === 'rejected') counts.rejected++;
+      else if (job.status === 'offer') counts.offer++;
+    }
+    return counts;
+  }, [jobs]);
 
   // Load jobs when userId changes
   const loadJobs = useCallback(async () => {
@@ -69,16 +79,18 @@ export function useJobs(userId: string | null): JobsState & JobsActions {
   }, [jobs]);
 
   // Add a new job
-  const addJob = useCallback(async (data: JobFormData): Promise<DuplicateResult | null> => {
+  const addJob = useCallback(async (data: JobFormData, skipDuplicateCheck = false): Promise<DuplicateResult | null> => {
     if (!userId) {
       setError('Please sign in to add jobs.');
       return null;
     }
 
-    // Check for duplicates first
-    const duplicate = checkDuplicate(data);
-    if (duplicate.isDuplicate) {
-      return duplicate;
+    // Check for duplicates first (skip if adding anyway)
+    if (!skipDuplicateCheck) {
+      const duplicate = checkDuplicate(data);
+      if (duplicate.isDuplicate) {
+        return duplicate;
+      }
     }
 
     const now = new Date().toISOString();

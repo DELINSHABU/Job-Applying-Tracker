@@ -126,7 +126,7 @@ export interface FilterOptions {
 }
 
 // Navigation tabs
-export type NavTab = 'dashboard' | 'jobs' | 'insights' | 'settings' | 'details' | 'profile';
+export type NavTab = 'dashboard' | 'jobs' | 'insights' | 'settings' | 'details' | 'profile' | 'mission';
 
 // AI Provider options
 export type AIProvider = 'gemini' | 'openai' | 'anthropic' | 'grok';
@@ -194,4 +194,14 @@ export interface StreakData {
   currentStreak: number;
   longestStreak: number;
   lastCompletedDate: string | null; // YYYY-MM-DD format
+}
+
+export interface GoalHistory {
+  id: string;
+  userId: string;
+  date: string; // YYYY-MM-DD format
+  targetApplications: number;
+  actualApplications: number;
+  completed: boolean;
+  streakAtCompletion: number;
 }

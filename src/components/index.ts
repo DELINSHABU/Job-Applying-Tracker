@@ -5,8 +5,7 @@ export { SearchBar } from './SearchBar';
 export { FloatingActionButton } from './FloatingActionButton';
 export { JobCard } from './JobCard';
 export { JobList } from './JobList';
-export { JobModal } from './JobModal';
-export { AuthModal } from './AuthModal';
+// JobModal and AuthModal are lazy-loaded via App.tsx - do NOT export here
 export { LoadingScreen } from './LoadingScreen';
 export { Sidebar } from './Sidebar';
 export { DesktopHeader } from './DesktopHeader';

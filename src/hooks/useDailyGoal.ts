@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { db } from '../services/firebase';
-import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
-import type { DailyGoal, StreakData } from '../types';
+import { doc, setDoc, onSnapshot, runTransaction, collection, addDoc } from 'firebase/firestore';
+import type { DailyGoal, StreakData, GoalHistory } from '../types';
 
 function getTodayDate(): string {
   return new Date().toISOString().split('T')[0] ?? '';
@@ -12,6 +12,8 @@ function getYesterdayDate(): string {
   yesterday.setDate(yesterday.getDate() - 1);
   return yesterday.toISOString().split('T')[0] ?? '';
 }
+
+const STREAK_MILESTONES = [7, 14, 21, 30, 60, 100];
 
 interface DailyGoalState {
   dailyGoal: DailyGoal | null;
@@ -26,7 +28,7 @@ interface DailyGoalActions {
   resetDailyProgress: () => void;
 }
 
-export function useDailyGoal(userId: string | null, todayJobCount: number): DailyGoalState & DailyGoalActions {
+export function useDailyGoal(userId: string | null, todayJobCount: number, onStreakUpdate?: (streak: StreakData, isBroken: boolean) => void, onMilestone?: (streak: number) => void): DailyGoalState & DailyGoalActions {
   const [dailyGoal, setDailyGoalState] = useState<DailyGoal | null>(null);
   const [streakData, setStreakData] = useState<StreakData>({
     currentStreak: 0,
@@ -38,38 +40,51 @@ export function useDailyGoal(userId: string | null, todayJobCount: number): Dail
   const todayDate = getTodayDate();
   const todayApplications = todayJobCount;
 
-  const loadDailyGoal = useCallback(async () => {
+  // Real-time subscription for daily goal and streak
+  useEffect(() => {
     if (!userId) {
       setLoading(false);
+      setDailyGoalState(null);
       return;
     }
 
-    try {
-      setLoading(true);
-      
-      // Load daily goal
-      const goalDoc = await getDoc(doc(db, 'users', userId, 'goals', todayDate));
-      if (goalDoc.exists()) {
-        setDailyGoalState(goalDoc.data() as DailyGoal);
-      } else {
-        setDailyGoalState(null);
-      }
+    setLoading(true);
 
-      // Load streak data
-      const streakDoc = await getDoc(doc(db, 'users', userId, 'stats', 'streak'));
-      if (streakDoc.exists()) {
-        setStreakData(streakDoc.data() as StreakData);
+    // Subscribe to daily goal
+    const unsubscribeGoal = onSnapshot(
+      doc(db, 'users', userId, 'goals', todayDate),
+      (snapshot) => {
+        if (snapshot.exists()) {
+          setDailyGoalState(snapshot.data() as DailyGoal);
+        } else {
+          setDailyGoalState(null);
+        }
+        setLoading(false);
+      },
+      (error) => {
+        console.error('Error listening to daily goal:', error);
+        setLoading(false);
       }
-    } catch (err) {
-      console.error('Error loading daily goal:', err);
-    } finally {
-      setLoading(false);
-    }
+    );
+
+    // Subscribe to streak data
+    const unsubscribeStreak = onSnapshot(
+      doc(db, 'users', userId, 'stats', 'streak'),
+      (snapshot) => {
+        if (snapshot.exists()) {
+          setStreakData(snapshot.data() as StreakData);
+        }
+      },
+      (error) => {
+        console.error('Error listening to streak data:', error);
+      }
+    );
+
+    return () => {
+      unsubscribeGoal();
+      unsubscribeStreak();
+    };
   }, [userId, todayDate]);
-
-  useEffect(() => {
-    loadDailyGoal();
-  }, [loadDailyGoal]);
 
   const setDailyGoal = useCallback(async (target: number) => {
     if (!userId) return;
@@ -83,12 +98,27 @@ export function useDailyGoal(userId: string | null, todayJobCount: number): Dail
       completed: todayApplications >= target,
     };
 
-    await setDoc(doc(db, 'users', userId, 'goals', todayDate), goal);
-    setDailyGoalState(goal);
+    // Update in Firestore - onSnapshot will update the local state
+    try {
+      await setDoc(doc(db, 'users', userId, 'goals', todayDate), goal);
 
-    // Check if goal is completed and update streak
-    if (todayApplications >= target) {
-      await updateStreak(userId, todayDate, streakData);
+      // Check if goal is completed and update streak + save history
+      if (todayApplications >= target) {
+        await updateStreak(userId, todayDate, streakData);
+        // Save to history
+        const historyRef = collection(db, 'users', userId, 'goalHistory');
+        const historyEntry: Omit<GoalHistory, 'id'> = {
+          userId,
+          date: todayDate,
+          targetApplications: target,
+          actualApplications: todayApplications,
+          completed: true,
+          streakAtCompletion: streakData.currentStreak + 1,
+        };
+        await addDoc(historyRef, historyEntry);
+      }
+    } catch (error) {
+      console.error('Failed to save daily goal to Firestore:', error);
     }
   }, [userId, todayDate, todayApplications, streakData]);
 
@@ -125,26 +155,81 @@ export function useDailyGoal(userId: string | null, todayJobCount: number): Dail
   const incrementTodayApplications = useCallback(async () => {
     if (!userId || !dailyGoal) return;
 
-    const newCount = dailyGoal.currentApplications + 1;
-    const isCompleted = newCount >= dailyGoal.targetApplications;
+    const goalRef = doc(db, 'users', userId, 'goals', todayDate);
+    const streakRef = doc(db, 'users', userId, 'stats', 'streak');
 
-    const updatedGoal: DailyGoal = {
-      ...dailyGoal,
-      currentApplications: newCount,
-      completed: isCompleted,
-    };
+    try {
+      await runTransaction(db, async (transaction) => {
+        const goalDoc = await transaction.get(goalRef);
+        const streakDoc = await transaction.get(streakRef);
 
-    await updateDoc(doc(db, 'users', userId, 'goals', todayDate), {
-      currentApplications: newCount,
-      completed: isCompleted,
-    });
-    setDailyGoalState(updatedGoal);
+        if (!goalDoc.exists() || !streakDoc.exists()) return;
 
-    // Check if goal just got completed
-    if (isCompleted && !dailyGoal.completed) {
-      await updateStreak(userId, todayDate, streakData);
+        const currentGoal = goalDoc.data() as DailyGoal;
+        const currentStreak = streakDoc.data() as StreakData;
+
+        const newCount = currentGoal.currentApplications + 1;
+        const isCompleted = newCount >= currentGoal.targetApplications;
+
+        transaction.update(goalRef, {
+          currentApplications: newCount,
+          completed: isCompleted,
+        });
+
+        if (isCompleted && !currentGoal.completed) {
+          const lastDate = currentStreak.lastCompletedDate;
+          let newStreak = currentStreak.currentStreak;
+          let newLongest = currentStreak.longestStreak;
+
+          if (lastDate !== todayDate) {
+            if (lastDate === getYesterdayDate()) {
+              newStreak = currentStreak.currentStreak + 1;
+            } else {
+              newStreak = 1;
+            }
+            if (newStreak > newLongest) {
+              newLongest = newStreak;
+            }
+            transaction.set(streakRef, {
+              currentStreak: newStreak,
+              longestStreak: newLongest,
+              lastCompletedDate: todayDate,
+            });
+            
+            // Save to history
+            const historyRef = collection(db, 'users', userId, 'goalHistory');
+            const historyEntry = {
+              userId,
+              date: todayDate,
+              targetApplications: currentGoal.targetApplications,
+              actualApplications: newCount,
+              completed: true,
+              streakAtCompletion: newStreak,
+            };
+            transaction.set(doc(historyRef), historyEntry);
+            
+            if (onMilestone && STREAK_MILESTONES.includes(newStreak)) {
+              onMilestone(newStreak);
+            }
+          }
+        }
+      });
+
+      setDailyGoalState(prev => prev ? {
+        ...prev,
+        currentApplications: prev.currentApplications + 1,
+        completed: prev.currentApplications + 1 >= prev.targetApplications,
+      } : null);
+
+      await onSnapshot(goalRef, (snapshot) => {
+        if (snapshot.exists()) {
+          setDailyGoalState(snapshot.data() as DailyGoal);
+        }
+      });
+    } catch (error) {
+      console.error('Failed to increment applications:', error);
     }
-  }, [userId, dailyGoal, todayDate, streakData]);
+  }, [userId, dailyGoal, todayDate, onMilestone]);
 
   const resetDailyProgress = useCallback(() => {
     if (dailyGoal) {
@@ -165,14 +250,18 @@ export function useDailyGoal(userId: string | null, todayJobCount: number): Dail
     
     // If last completed date is before yesterday, streak is broken
     if (lastDate !== todayDate && lastDate !== yesterday) {
+      const previousStreak = streakData.currentStreak;
       const brokenStreak: StreakData = {
         ...streakData,
         currentStreak: 0,
       };
       setStreakData(brokenStreak);
       setDoc(doc(db, 'users', userId, 'stats', 'streak'), brokenStreak);
+      if (onStreakUpdate && previousStreak > 0) {
+        onStreakUpdate(brokenStreak, true);
+      }
     }
-  }, [userId, streakData.lastCompletedDate, todayDate]);
+  }, [userId, streakData.lastCompletedDate, todayDate, onStreakUpdate]);
 
   return {
     dailyGoal,

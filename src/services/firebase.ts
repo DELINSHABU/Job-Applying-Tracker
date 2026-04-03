@@ -20,7 +20,7 @@ import {
   deleteDoc,
   getDocs,
   query,
-  orderBy
+  orderBy,
 } from 'firebase/firestore';
 import type { Job, User, UserProfile } from '../types';
 

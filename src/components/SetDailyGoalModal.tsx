@@ -22,10 +22,10 @@ export function SetDailyGoalModal({
   const [target, setTarget] = useState(10);
 
   useEffect(() => {
-    if (currentGoal) {
-      setTarget(currentGoal.targetApplications);
+    if (isOpen) {
+      setTarget(currentGoal?.targetApplications ?? 10);
     }
-  }, [currentGoal]);
+  }, [isOpen, currentGoal]);
 
   const increment = () => setTarget(prev => Math.min(prev + 1, 20));
   const decrement = () => setTarget(prev => Math.max(prev - 1, 1));
@@ -35,13 +35,21 @@ export function SetDailyGoalModal({
     onClose();
   };
 
-  const progress = currentApplications / target;
+  const progress = target > 0 ? currentApplications / target : 0;
   const isCompleted = currentApplications >= target;
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-md w-full p-0 overflow-hidden bg-[#0E1525] border border-[#1A2438] rounded-3xl">
+    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent hideClose className="max-w-md w-full p-0 overflow-hidden bg-[#0E1525] border border-[#1A2438] rounded-3xl">
         <div className="relative">
+          {/* Close Button */}
+          <button 
+            onClick={onClose}
+            className="absolute top-4 right-4 z-50 p-2 rounded-full bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-colors"
+          >
+            <span className="material-icons-round">close</span>
+          </button>
+
           {/* Blurred Background Overlay */}
           <div 
             className="absolute inset-0 z-0 opacity-30"
@@ -65,6 +73,16 @@ export function SetDailyGoalModal({
                   {streakData.currentStreak} Day Streak
                 </span>
               </div>
+              {streakData.longestStreak > 0 && (
+                <div className="inline-flex items-center justify-center mb-4 bg-[#4edea3]/10 px-3 py-1 rounded-full ml-2">
+                  <span className="material-icons-round text-[#4edea3] mr-1 text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>
+                    emoji_events
+                  </span>
+                  <span className="text-xs text-[#4edea3] font-bold">
+                    Best: {streakData.longestStreak} days
+                  </span>
+                </div>
+              )}
               <h1 className="text-3xl font-bold text-white tracking-tight" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>
                 Set Your Daily Mission
               </h1>

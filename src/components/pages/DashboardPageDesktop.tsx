@@ -21,6 +21,7 @@ interface DashboardPageDesktopProps {
   dailyGoal: DailyGoal | null;
   todayApplications: number;
   onSetDailyGoal: (target: number) => void;
+  onOpenMissionHistory: () => void;
 }
 
 export function DashboardPageDesktop({
@@ -37,11 +38,12 @@ export function DashboardPageDesktop({
   dailyGoal,
   todayApplications,
   onSetDailyGoal,
+  onOpenMissionHistory,
 }: DashboardPageDesktopProps) {
   const [isGoalModalOpen, setIsGoalModalOpen] = useState(false);
 
   const targetApplications = dailyGoal?.targetApplications ?? 10;
-  const currentApplications = dailyGoal?.currentApplications ?? todayApplications;
+  const currentApplications = todayApplications;
   const progress = targetApplications > 0 ? currentApplications / targetApplications : 0;
   const isGoalCompleted = currentApplications >= targetApplications;
 
@@ -56,13 +58,27 @@ export function DashboardPageDesktop({
     return acc;
   }, {} as Record<string, number>);
 
-  const linkedInCount = platformCounts['linkedin'] || 0;
-  const indeedCount = platformCounts['indeed'] || 0;
-  const directCount = platformCounts['direct'] || 0;
+  const sortedPlatforms = Object.entries(platformCounts)
+    .sort(([, a], [, b]) => b - a)
+    .slice(0, 3);
+
+  const getPlatformColor = (platform: string) => {
+    const colors: Record<string, string> = {
+      linkedin: 'bg-blue-600',
+      indeed: 'bg-blue-400',
+      glassdoor: 'bg-emerald-600',
+      ziprecruiter: 'bg-green-500',
+      monster: 'bg-purple-600',
+      whatsapp: 'bg-green-400',
+      email: 'bg-red-400',
+      direct: 'bg-slate-500',
+      referral: 'bg-orange-500',
+    };
+    return colors[platform.toLowerCase()] || 'bg-primary';
+  };
 
   return (
     <motion.div
-      key="desktop-dashboard"
       variants={staggerContainerVariants}
       initial="initial"
       animate="animate"
@@ -107,7 +123,10 @@ export function DashboardPageDesktop({
       </div>
 
       {/* Daily Goal Card */}
-      <div className="bg-white dark:bg-card-bg rounded-2xl p-6 shadow-sm border border-slate-100 dark:border-card-border">
+      <button 
+        onClick={onOpenMissionHistory}
+        className="w-full text-left bg-white dark:bg-card-bg rounded-2xl p-6 shadow-sm border border-slate-100 dark:border-card-border hover:opacity-90 transition-opacity"
+      >
         <div className="flex justify-between items-center mb-4">
           <div className="flex items-center gap-2">
             <span className="material-icons-round text-orange-500">local_fire_department</span>
@@ -136,21 +155,19 @@ export function DashboardPageDesktop({
             </div>
           </div>
           <div className="flex items-center gap-4 justify-end">
-            <div className="flex items-center gap-1.5">
-              <div className="w-2 h-2 rounded-full bg-blue-500"></div>
-              <span className="text-xs font-medium text-slate-500">LinkedIn: {linkedInCount}</span>
-            </div>
-            <div className="flex items-center gap-1.5">
-              <div className="w-2 h-2 rounded-full bg-slate-400"></div>
-              <span className="text-xs font-medium text-slate-500">Indeed: {indeedCount}</span>
-            </div>
-            <div className="flex items-center gap-1.5">
-              <div className="w-2 h-2 rounded-full bg-emerald-500"></div>
-              <span className="text-xs font-medium text-slate-500">Direct: {directCount}</span>
-            </div>
+            {sortedPlatforms.length > 0 ? (
+              sortedPlatforms.map(([platform, count]) => (
+                <div key={platform} className="flex items-center gap-1.5">
+                  <div className={`w-2 h-2 rounded-full ${getPlatformColor(platform)}`}></div>
+                  <span className="text-xs font-medium text-slate-500 capitalize">{platform}: {count}</span>
+                </div>
+              ))
+            ) : (
+              <span className="text-xs font-medium text-slate-400 italic">No activity today</span>
+            )}
           </div>
         </div>
-      </div>
+      </button>
 
       {/* Stats Cards */}
       <DesktopStatsCards stats={stats} />

@@ -1,9 +1,9 @@
+/* Import self-hosted fonts - must be first */
+@import './styles/fonts.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-/* Inter font loaded via HTML <link> for non-render-blocking */
-/* font-display: swap is included in the Google Fonts URL */
 
 /* Base styles */
 body {
@@ -43,10 +43,7 @@ html.dark body {
   box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
 }
 
-/* Material Symbols Outlined settings */
-.material-symbols-outlined {
-  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
-}
+/* Material Symbols Outlined settings - now defined in fonts.css */
 
 /* Hide scrollbar for stats cards */
 .hide-scrollbar::-webkit-scrollbar {

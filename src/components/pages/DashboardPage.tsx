@@ -24,6 +24,7 @@ interface DashboardPageProps {
   dailyGoal: DailyGoal | null;
   todayApplications: number;
   onSetDailyGoal: (target: number) => void;
+  onOpenMissionHistory: () => void;
 }
 
 export function DashboardPage({
@@ -43,11 +44,12 @@ export function DashboardPage({
   dailyGoal,
   todayApplications,
   onSetDailyGoal,
+  onOpenMissionHistory,
 }: DashboardPageProps) {
   const [isGoalModalOpen, setIsGoalModalOpen] = useState(false);
 
   const targetApplications = dailyGoal?.targetApplications ?? 10;
-  const currentApplications = dailyGoal?.currentApplications ?? todayApplications;
+  const currentApplications = todayApplications;
   const progress = targetApplications > 0 ? currentApplications / targetApplications : 0;
   const isGoalCompleted = currentApplications >= targetApplications;
 
@@ -84,7 +86,6 @@ export function DashboardPage({
 
   return (
     <motion.div
-      key="dashboard"
       variants={staggerContainerVariants}
       initial="initial"
       animate="animate"
@@ -110,7 +111,10 @@ export function DashboardPage({
         </div>
 
         {/* Daily Mission Section */}
-        <div className="mb-6 bg-white dark:bg-card-bg rounded-2xl p-4 shadow-sm border border-slate-100 dark:border-card-border">
+        <button 
+          onClick={onOpenMissionHistory}
+          className="w-full mb-6 bg-white dark:bg-card-bg rounded-2xl p-4 shadow-sm border border-slate-100 dark:border-card-border text-left hover:opacity-90 transition-opacity"
+        >
           <div className="flex justify-between items-center mb-4">
             <div className="flex items-center gap-2">
               <span className="material-icons-round text-orange-500">local_fire_department</span>
@@ -118,12 +122,9 @@ export function DashboardPage({
                 {streakData.currentStreak > 0 ? `${streakData.currentStreak} Day Streak!` : 'Start your streak!'}
               </span>
             </div>
-            <button 
-              onClick={() => setIsGoalModalOpen(true)}
-              className="text-[11px] font-semibold text-primary uppercase tracking-wider hover:underline"
-            >
-              Set Daily Goal
-            </button>
+            <span className="text-[11px] font-semibold text-primary uppercase tracking-wider">
+              View Details
+            </span>
           </div>
           
           <div className="space-y-4">
@@ -154,9 +155,9 @@ export function DashboardPage({
                 <span className="text-[11px] font-medium text-slate-400 italic">No activity today</span>
               )}
             </div>
-          </div>
-        </div>
-      </header>
+            </div>
+          </button>
+        </header>
 
       {/* Stats Cards */}
       <div className="px-5">

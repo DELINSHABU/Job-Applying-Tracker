@@ -190,7 +190,7 @@ export function JobModal({ isOpen, onClose, onSave, job, customPlatforms = [], o
   return (
     <>
       <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-        <DialogContent className="p-0 gap-0 max-w-lg max-h-[95vh] overflow-hidden flex flex-col bg-card dark:bg-popover border border-border dark:border-border">
+        <DialogContent hideClose className="p-0 gap-0 max-w-lg max-h-[95vh] overflow-hidden flex flex-col bg-card dark:bg-popover border border-border dark:border-border">
           {/* Header */}
           <header className="sticky top-0 z-10 bg-card/80 dark:bg-popover/80 backdrop-blur-md border-b border-border dark:border-border px-4 py-3 flex items-center justify-between">
             <button

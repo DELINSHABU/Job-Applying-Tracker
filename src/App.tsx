@@ -19,11 +19,13 @@ const SettingsPage = lazy(() => import('./components/pages/SettingsPage').then(m
 const ProfilePage = lazy(() => import('./components/pages/ProfilePage').then(m => ({ default: m.ProfilePage })));
 const DashboardPage = lazy(() => import('./components/pages/DashboardPage').then(m => ({ default: m.DashboardPage })));
 const DashboardPageDesktop = lazy(() => import('./components/pages/DashboardPageDesktop').then(m => ({ default: m.DashboardPageDesktop })));
+const MissionHistoryPage = lazy(() => import('./components/pages/MissionHistoryPage').then(m => ({ default: m.MissionHistoryPage })));
 const JobsPage = lazy(() => import('./components/pages/JobsPage').then(m => ({ default: m.JobsPage })));
 
 // Lazy load modals (only needed on user interaction)
 const JobModal = lazy(() => import('./components/JobModal').then(m => ({ default: m.JobModal })));
 const AuthModal = lazy(() => import('./components/AuthModal').then(m => ({ default: m.AuthModal })));
+const DuplicateDetectionModal = lazy(() => import('./components/DuplicateDetectionModal').then(m => ({ default: m.DuplicateDetectionModal })));
 
 // Loading spinner for Suspense fallbacks
 function LoadingSpinner() {
@@ -40,6 +42,10 @@ function App() {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [editingJob, setEditingJob] = useState<Job | null>(null);
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
+  
+  // Duplicate detection state
+  const [pendingJobData, setPendingJobData] = useState<JobFormData | null>(null);
+  const [duplicateResult, setDuplicateResult] = useState<{ isDuplicate: boolean; matchedJob?: Job; result: import('./types').DuplicateResult } | null>(null);
 
   // Auth state and actions
   const {
@@ -69,6 +75,7 @@ function App() {
     addJob,
     updateJob,
     deleteJob,
+    checkDuplicate,
   } = useJobs(user?.uid || null);
 
   // Search and filter
@@ -92,7 +99,22 @@ function App() {
     dailyGoal,
     streakData,
     setDailyGoal: saveDailyGoal,
-  } = useDailyGoal(user?.uid || null, todayJobCount);
+    incrementTodayApplications,
+  } = useDailyGoal(user?.uid || null, todayJobCount, (_newStreakData, isBroken) => {
+    if (isBroken) {
+      toast.info('Streak broken! Start a new streak today.', { duration: 5000 });
+    }
+  }, (milestone) => {
+    const messages: Record<number, string> = {
+      7: '1 Week Streak! You\'re on fire! 🔥',
+      14: '2 Weeks Streak! Incredible dedication! 🌟',
+      21: '3 Weeks Streak! You\'re unstoppable! 🚀',
+      30: '1 Month Streak! Legend status! 👑',
+      60: '60 Day Streak! Absolutely amazing! 🎉',
+      100: '100 Day Streak! You are a machine! 🏆',
+    };
+    toast.success(messages[milestone] || `Amazing! ${milestone} day streak!`, { duration: 8000 });
+  });
 
   // Handler for setting daily goal
   const handleSetDailyGoal = async (target: number) => {
@@ -130,6 +152,21 @@ function App() {
       await updateJob(editingJob.id, data);
       toast.success('Application updated successfully');
     } else {
+      const duplicateCheck = checkDuplicate(data);
+      
+      if (duplicateCheck.isDuplicate && duplicateCheck.matchedJobId) {
+        const matchedJob = jobs.find(j => j.id === duplicateCheck.matchedJobId);
+        if (matchedJob) {
+          setPendingJobData(data);
+          setDuplicateResult({
+            isDuplicate: true,
+            matchedJob,
+            result: duplicateCheck
+          });
+          return;
+        }
+      }
+      
       const duplicate = await addJob(data);
       if (duplicate?.isDuplicate) {
         toast.warning(`Possible duplicate: ${duplicate.reason}`, {
@@ -137,8 +174,24 @@ function App() {
         });
       } else {
         toast.success('Application added successfully');
+        await incrementTodayApplications();
       }
     }
+  };
+
+  const handleAddAnyway = async () => {
+    if (pendingJobData) {
+      await addJob(pendingJobData, true); // true = skip duplicate check
+      toast.success('Application added successfully');
+      await incrementTodayApplications();
+      setPendingJobData(null);
+      setDuplicateResult(null);
+    }
+  };
+
+  const handleDiscardDuplicate = () => {
+    setPendingJobData(null);
+    setDuplicateResult(null);
   };
 
   const handleDeleteJob = async (id: string) => {
@@ -299,6 +352,22 @@ function App() {
             />
           </motion.div>
         );
+      case 'mission':
+        return (
+          <motion.div
+            key="mission"
+            variants={pageVariants}
+            initial="initial"
+            animate="animate"
+            exit="exit"
+          >
+            <MissionHistoryPage
+              streakData={streakData}
+              dailyGoal={dailyGoal}
+              onBack={() => setActiveTab('dashboard')}
+            />
+          </motion.div>
+        );
       case 'jobs':
         return (
           <JobsPage
@@ -332,6 +401,7 @@ function App() {
             dailyGoal={dailyGoal}
             todayApplications={todayJobCount}
             onSetDailyGoal={handleSetDailyGoal}
+            onOpenMissionHistory={() => setActiveTab('mission')}
           />
         );
     }
@@ -411,6 +481,23 @@ function App() {
             />
           </motion.div>
         );
+      case 'mission':
+        return (
+          <motion.div
+            key="desktop-mission"
+            variants={pageVariants}
+            initial="initial"
+            animate="animate"
+            exit="exit"
+            className="max-w-2xl mx-auto"
+          >
+            <MissionHistoryPage
+              streakData={streakData}
+              dailyGoal={dailyGoal}
+              onBack={() => setActiveTab('dashboard')}
+            />
+          </motion.div>
+        );
       case 'jobs':
         return (
           <motion.div
@@ -450,6 +537,7 @@ function App() {
             dailyGoal={dailyGoal}
             todayApplications={todayJobCount}
             onSetDailyGoal={handleSetDailyGoal}
+            onOpenMissionHistory={() => setActiveTab('mission')}
           />
         );
     }
@@ -531,6 +619,19 @@ function App() {
                 onGoogleSignIn={signInWithGoogle}
                 error={authError}
               />
+
+              {/* Duplicate Detection Modal */}
+              {duplicateResult && duplicateResult.matchedJob && (
+                <DuplicateDetectionModal
+                  isOpen={duplicateResult.isDuplicate}
+                  onClose={handleDiscardDuplicate}
+                  onAddAnyway={handleAddAnyway}
+                  onDiscard={handleDiscardDuplicate}
+                  existingJob={duplicateResult.matchedJob}
+                  duplicateResult={duplicateResult.result}
+                  newJobData={pendingJobData as Job}
+                />
+              )}
             </Suspense>
 
             {/* Toast notifications */}
