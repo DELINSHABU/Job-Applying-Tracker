@@ -22,7 +22,7 @@ import {
   query,
   orderBy,
 } from 'firebase/firestore';
-import type { Job, User, UserProfile } from '../types';
+import type { Job, User, UserProfile, SuggestedJob, ScrapingSettings } from '../types';
 
 // Firebase configuration
 const firebaseConfig = {
@@ -175,14 +175,18 @@ export const profileService = {
       email: email,
       phone: '',
       location: '',
+      profession: '',
       skills: [],
       experienceSummary: '',
-      resumeUrl: '',
+      cvUrl: '',
+      cvText: '',
       portfolioUrl: '',
       githubUrl: '',
       targetSalaryMin: undefined,
       targetSalaryMax: undefined,
       preferredLocations: [],
+      scrapingKeywords: [],
+      preferredPlatforms: [],
       aiProvider: 'gemini',
       onboardingComplete: false,
       createdAt: now,
@@ -207,6 +211,116 @@ export const profileService = {
       onboardingComplete: true,
       updatedAt: new Date().toISOString(),
     }, { merge: true });
+  },
+};
+
+// Firestore suggested jobs operations
+export const suggestedJobsService = {
+  // Get all suggested jobs for a user
+  getSuggestedJobs: async (userId: string): Promise<SuggestedJob[]> => {
+    const jobsRef = collection(db, 'users', userId, 'suggestedJobs');
+    const q = query(jobsRef, orderBy('fetchedAt', 'desc'));
+    const snapshot = await getDocs(q);
+    
+    return snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    } as SuggestedJob));
+  },
+
+  // Save a suggested job
+  saveSuggestedJob: async (userId: string, job: SuggestedJob): Promise<void> => {
+    const jobRef = doc(db, 'users', userId, 'suggestedJobs', job.id);
+    await setDoc(jobRef, job);
+  },
+
+  // Save multiple suggested jobs (batch)
+  saveSuggestedJobs: async (userId: string, jobs: SuggestedJob[]): Promise<void> => {
+    const batch: Promise<void>[] = [];
+    for (const job of jobs) {
+      const jobRef = doc(db, 'users', userId, 'suggestedJobs', job.id);
+      batch.push(setDoc(jobRef, job));
+    }
+    await Promise.all(batch);
+  },
+
+  // Update suggested job (e.g., mark as dismissed or applied)
+  updateSuggestedJob: async (userId: string, jobId: string, updates: Partial<SuggestedJob>): Promise<void> => {
+    const jobRef = doc(db, 'users', userId, 'suggestedJobs', jobId);
+    await setDoc(jobRef, updates, { merge: true });
+  },
+
+  // Delete a suggested job
+  deleteSuggestedJob: async (userId: string, jobId: string): Promise<void> => {
+    const jobRef = doc(db, 'users', userId, 'suggestedJobs', jobId);
+    await deleteDoc(jobRef);
+  },
+
+  // Clear all suggested jobs
+  clearSuggestedJobs: async (userId: string): Promise<void> => {
+    const jobsRef = collection(db, 'users', userId, 'suggestedJobs');
+    const snapshot = await getDocs(jobsRef);
+    const deletes = snapshot.docs.map(doc => deleteDoc(doc.ref));
+    await Promise.all(deletes);
+  },
+
+  // Dismiss a job (mark as dismissed)
+  dismissSuggestedJob: async (userId: string, jobId: string): Promise<void> => {
+    const jobRef = doc(db, 'users', userId, 'suggestedJobs', jobId);
+    await setDoc(jobRef, { dismissed: true }, { merge: true });
+  },
+
+  // Mark job as applied and link to actual job
+  markAsApplied: async (userId: string, jobId: string, appliedJobId: string): Promise<void> => {
+    const jobRef = doc(db, 'users', userId, 'suggestedJobs', jobId);
+    await setDoc(jobRef, { 
+      applied: true, 
+      appliedJobId,
+      dismissed: true 
+    }, { merge: true });
+  },
+};
+
+// Firestore scraping settings operations
+export const scrapingSettingsService = {
+  // Get scraping settings for a user
+  getScrapingSettings: async (userId: string): Promise<ScrapingSettings | null> => {
+    const settingsRef = doc(db, 'users', userId, 'scrapingSettings', 'config');
+    const snapshot = await getDoc(settingsRef);
+    
+    if (!snapshot.exists()) {
+      return null;
+    }
+    
+    return snapshot.data() as ScrapingSettings;
+  },
+
+  // Save scraping settings
+  saveScrapingSettings: async (userId: string, settings: ScrapingSettings): Promise<void> => {
+    const settingsRef = doc(db, 'users', userId, 'scrapingSettings', 'config');
+    await setDoc(settingsRef, {
+      ...settings,
+      updatedAt: new Date().toISOString(),
+    }, { merge: true });
+  },
+
+  // Create default scraping settings
+  createDefaultSettings: async (userId: string): Promise<ScrapingSettings> => {
+    const now = new Date().toISOString();
+    const defaultSettings: ScrapingSettings = {
+      id: 'default',
+      userId,
+      platforms: ['linkedin', 'indeed'],
+      keywords: [],
+      locations: [],
+      remoteOnly: false,
+      autoRefresh: false,
+      createdAt: now,
+      updatedAt: now,
+    };
+    
+    await scrapingSettingsService.saveScrapingSettings(userId, defaultSettings);
+    return defaultSettings;
   },
 };
 

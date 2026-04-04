@@ -49,33 +49,26 @@ export function DesktopHeader({
 
       {/* Right side */}
       <div className="flex items-center gap-4">
-        {/* Notification */}
-        <Button
-          variant="outline"
-          size="icon"
-          className="w-10 h-10 rounded-full text-slate-500 dark:text-light-grey hover:bg-slate-100 dark:hover:bg-card-bg border-slate-200 dark:border-card-border"
-          aria-label="Notifications"
-        >
-          <span className="material-symbols-outlined">notifications</span>
-        </Button>
-
-        <div className="h-8 w-[1px] bg-slate-200 dark:bg-card-border mx-2"></div>
-
         {/* User */}
         {user ? (
-          <div className="flex items-center gap-3 pl-2 cursor-pointer" onClick={onProfileClick}>
+          <div className="flex items-center gap-3 pl-2 cursor-pointer group" onClick={onProfileClick}>
             <div className="text-right">
-              <p className="text-sm font-semibold text-slate-900 dark:text-off-white">
+              <p className="text-sm font-semibold text-slate-900 dark:text-off-white group-hover:text-primary transition-colors">
                 {user.displayName || user.email?.split('@')[0]}
               </p>
               <p className="text-[11px] text-slate-500 dark:text-light-grey">Candidate</p>
             </div>
-            <Button
-              className="w-10 h-10 rounded-full font-semibold"
-              title="View profile"
-            >
-              {getInitials(user)}
-            </Button>
+            <div className="w-10 h-10 rounded-full bg-primary overflow-hidden flex items-center justify-center text-white font-semibold shadow-sm border border-border group-hover:border-primary transition-all group-hover:scale-105 active:scale-95">
+              {user.photoURL ? (
+                <img 
+                  src={user.photoURL} 
+                  alt={user.displayName || 'Profile'} 
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                getInitials(user)
+              )}
+            </div>
           </div>
         ) : (
           <Button

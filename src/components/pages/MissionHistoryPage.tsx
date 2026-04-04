@@ -1,9 +1,11 @@
 import { useState, useEffect, useMemo } from 'react';
 import { db } from '../../services/firebase';
 import { collection, query, orderBy, getDocs, limit } from 'firebase/firestore';
-import type { GoalHistory, StreakData, DailyGoal } from '../../types';
+import { getLocalDateString } from '../../lib/utils';
+import type { StreakData, DailyGoal, Job } from '../../types';
 
 interface MissionHistoryPageProps {
+  jobs: Job[];
   streakData: StreakData;
   dailyGoal: DailyGoal | null;
   onBack: () => void;
@@ -16,10 +18,10 @@ function getWeekDates(offset: number): Date[] {
   if (!today) return Array(7).fill(new Date());
   
   const startOfWeek = new Date(today);
-  startOfWeek.setDate(today.getDate() - today.getDay() + (offset * 7));
-  startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay() + 1);
-  
-  if (!startOfWeek.getTime()) return Array(7).fill(new Date());
+  // Get Monday of current week
+  const day = today.getDay();
+  const diff = today.getDate() - day + (day === 0 ? -6 : 1);
+  startOfWeek.setDate(diff + (offset * 7));
   
   const dates: Date[] = [];
   for (let i = 0; i < 7; i++) {
@@ -31,7 +33,7 @@ function getWeekDates(offset: number): Date[] {
 }
 
 function formatDateKey(date: Date): string {
-  return date.toISOString().split('T')[0] ?? '';
+  return getLocalDateString(date);
 }
 
 function formatDisplayDate(date: Date): string {
@@ -46,8 +48,8 @@ function getWeekRange(offset: number): string {
   return `${formatDisplayDate(start)} — ${formatDisplayDate(end)}`;
 }
 
-export function MissionHistoryPage({ streakData, dailyGoal, onBack }: MissionHistoryPageProps) {
-  const [history, setHistory] = useState<GoalHistory[]>([]);
+export function MissionHistoryPage({ jobs, streakData, dailyGoal, onBack }: MissionHistoryPageProps) {
+  const [goals, setGoals] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(true);
   const [weekOffset, setWeekOffset] = useState(0);
   const userId = localStorage.getItem('userId') || null;
@@ -55,50 +57,110 @@ export function MissionHistoryPage({ streakData, dailyGoal, onBack }: MissionHis
   const weekDates = useMemo(() => getWeekDates(weekOffset), [weekOffset]);
   const weekRange = useMemo(() => getWeekRange(weekOffset), [weekOffset]);
 
+  // Group jobs by date
+  const jobCountsByDate = useMemo(() => {
+    const counts: Record<string, number> = {};
+    jobs.forEach(job => {
+      if (job.appliedDate) {
+        const date = job.appliedDate.split('T')[0];
+        if (date) {
+          counts[date] = (counts[date] || 0) + 1;
+        }
+      }
+    });
+    return counts;
+  }, [jobs]);
+
   useEffect(() => {
-    if (!userId) return;
+    if (!userId) {
+      setLoading(false);
+      return;
+    }
     
-    const fetchHistory = async () => {
+    const fetchGoals = async () => {
       try {
-        const historyRef = collection(db, 'users', userId, 'goalHistory');
+        const goalsRef = collection(db, 'users', userId, 'goals');
         const q = query(
-          historyRef,
+          goalsRef,
           orderBy('date', 'desc'),
-          limit(30)
+          limit(60)
         );
         const snapshot = await getDocs(q);
-        const historyData = snapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data()
-        })) as GoalHistory[];
-        setHistory(historyData);
+        const goalsData: Record<string, number> = {};
+        snapshot.docs.forEach(doc => {
+          const data = doc.data() as DailyGoal;
+          goalsData[data.date] = data.targetApplications;
+        });
+        setGoals(goalsData);
       } catch (error) {
-        console.error('Error fetching history:', error);
+        console.error('Error fetching goals:', error);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchHistory();
+    fetchGoals();
   }, [userId]);
 
+  // Create history from jobs and goals
+  const history = useMemo(() => {
+    const todayStr = getLocalDateString();
+    const allDates = new Set([...Object.keys(jobCountsByDate), ...Object.keys(goals), todayStr]);
+    const sortedDates = Array.from(allDates)
+      .filter((date): date is string => !!date)
+      .sort((a, b) => b.localeCompare(a));
+    
+    const defaultTarget = dailyGoal?.targetApplications || 10;
+    
+    return sortedDates.map(date => {
+      const actual = jobCountsByDate[date] || 0;
+      const target = goals[date] || defaultTarget;
+      return {
+        id: date,
+        date,
+        actualApplications: actual,
+        targetApplications: target,
+        completed: actual >= target,
+      };
+    });
+  }, [jobCountsByDate, goals, dailyGoal]);
+
   const weekHistory = useMemo(() => {
-    const historyMap = new Map<string, GoalHistory>();
-    history.forEach(h => historyMap.set(h.date, h));
+    const historyMap = new Map<string, { date: string, actualApplications: number, targetApplications: number, completed: boolean }>();
+    history.forEach(h => {
+      if (h.date) {
+        historyMap.set(h.date, h);
+      }
+    });
+    
+    const todayStr = getLocalDateString();
     
     return weekDates.map(date => {
       const dateKey = formatDateKey(date);
+      const isToday = dateKey === todayStr;
+      
+      // For today, use real-time data from props if available
+      let historyItem = historyMap.get(dateKey);
+      if (isToday && dailyGoal) {
+        historyItem = {
+          date: dateKey,
+          actualApplications: Math.max(jobCountsByDate[dateKey] || 0, dailyGoal.currentApplications),
+          targetApplications: dailyGoal.targetApplications,
+          completed: Math.max(jobCountsByDate[dateKey] || 0, dailyGoal.currentApplications) >= dailyGoal.targetApplications
+        };
+      }
+
       return {
         date,
-        history: historyMap.get(dateKey) || null,
-        isToday: dateKey === new Date().toISOString().split('T')[0],
+        history: historyItem || null,
+        isToday,
         isFuture: date > new Date(),
       };
     });
-  }, [weekDates, history]);
+  }, [weekDates, history, dailyGoal, jobCountsByDate]);
 
   const completedDays = weekHistory.filter(w => w.history?.completed).length;
-  const totalDays = weekHistory.filter(w => !w.isFuture).length;
+  const totalDays = weekHistory.filter(w => !w.isFuture && w.history).length;
   const accuracy = totalDays > 0 ? Math.round((completedDays / totalDays) * 100) : 0;
 
   const totalCompletions = history.filter(h => h.completed).length;

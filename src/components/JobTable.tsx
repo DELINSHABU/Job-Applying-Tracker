@@ -180,7 +180,10 @@ export function JobTable({ jobs, onEdit, onDelete, onView, loading }: JobTablePr
                   {formatDate(job.appliedDate)}
                 </TableCell>
                 <TableCell className="px-8 py-5 text-right">
-                  <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <div 
+                    className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                    onClick={(e) => e.stopPropagation()}
+                  >
                     <Button
                       variant="ghost"
                       size="icon"

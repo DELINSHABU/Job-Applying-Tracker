@@ -4,8 +4,11 @@ import { SearchBar } from '../SearchBar';
 import { JobList } from '../JobList';
 import { StatsCards } from '../StatsCards';
 import { SetDailyGoalModal } from '../SetDailyGoalModal';
-import { User, Job, JobStats, StreakData, DailyGoal } from '../../types';
-import { staggerContainerVariants } from '../../lib/animations';
+import { SuggestedJobCard } from '../SuggestedJobCard';
+import { User, Job, JobStats, StreakData, DailyGoal, SuggestedJob } from '@/types';
+import { staggerContainerVariants } from '@/lib/animations';
+import { useSuggestedJobs } from '@/hooks/useSuggestedJobs';
+import { getLocalDateString } from '@/lib/utils';
 
 interface DashboardPageProps {
   user: User | null;
@@ -25,6 +28,7 @@ interface DashboardPageProps {
   todayApplications: number;
   onSetDailyGoal: (target: number) => void;
   onOpenMissionHistory: () => void;
+  onViewSuggestedJob: (job: SuggestedJob) => void;
 }
 
 export function DashboardPage({
@@ -45,8 +49,17 @@ export function DashboardPage({
   todayApplications,
   onSetDailyGoal,
   onOpenMissionHistory,
+  onViewSuggestedJob,
 }: DashboardPageProps) {
   const [isGoalModalOpen, setIsGoalModalOpen] = useState(false);
+  const [suggestedJobsExpanded, setSuggestedJobsExpanded] = useState(true);
+  
+  const { 
+    activeJobs, 
+    dismissJob, 
+    removeJob, 
+    totalCount 
+  } = useSuggestedJobs(user?.uid || null);
 
   const targetApplications = dailyGoal?.targetApplications ?? 10;
   const currentApplications = todayApplications;
@@ -54,7 +67,7 @@ export function DashboardPage({
   const isGoalCompleted = currentApplications >= targetApplications;
 
   // Calculate platform counts for today (based on appliedDate)
-  const today = new Date().toISOString().split('T')[0] ?? '';
+  const today = getLocalDateString();
   const todayJobs = jobs.filter(j => {
     const appliedDate = j.appliedDate;
     return appliedDate?.startsWith(today);
@@ -101,11 +114,21 @@ export function DashboardPage({
             </p>
           </div>
           <div className="flex items-center gap-3">
-            <button className="p-2 rounded-full bg-slate-200/50 dark:bg-slate-800 transition-colors">
-              <span className="material-icons-round text-xl">notifications</span>
-            </button>
-            <button onClick={user ? onProfileClick : onLoginClick} className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white font-semibold">
-              {user?.displayName ? user.displayName.split(' ').map((n: string) => n[0]).join('').slice(0, 2) : 'G'}
+            <button 
+              onClick={user ? onProfileClick : onLoginClick} 
+              className="w-10 h-10 rounded-full overflow-hidden bg-primary flex items-center justify-center text-white font-semibold transition-transform active:scale-95"
+            >
+              {user?.photoURL ? (
+                <img 
+                  src={user.photoURL} 
+                  alt={user.displayName || 'Profile'} 
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                user?.displayName 
+                  ? user.displayName.split(' ').map((n: string) => n[0]).join('').slice(0, 2).toUpperCase() 
+                  : (user?.email?.charAt(0).toUpperCase() || 'G')
+              )}
             </button>
           </div>
         </div>
@@ -161,8 +184,48 @@ export function DashboardPage({
 
       {/* Stats Cards */}
       <div className="px-5">
-        <StatsCards stats={stats} />
+        <StatsCards stats={stats} suggestedCount={totalCount} />
       </div>
+
+      {/* Suggested Jobs Section */}
+      {user && totalCount > 0 && (
+        <div className="px-5 mt-4">
+          <button
+            onClick={() => setSuggestedJobsExpanded(!suggestedJobsExpanded)}
+            className="w-full flex items-center justify-between mb-3"
+          >
+            <h2 className="text-sm font-semibold text-slate-900 dark:text-off-white flex items-center gap-2">
+              <span className="material-icons-round text-primary">auto_awesome</span>
+              Suggested Jobs
+              <span className="bg-primary/10 text-primary text-xs px-2 py-0.5 rounded-full">
+                {activeJobs.length}
+              </span>
+            </h2>
+            <span className="material-icons-round text-slate-400">
+              {suggestedJobsExpanded ? 'expand_less' : 'expand_more'}
+            </span>
+          </button>
+          
+          {suggestedJobsExpanded && (
+            <div className="space-y-3">
+              {activeJobs.slice(0, 5).map(job => (
+                <SuggestedJobCard
+                  key={job.id}
+                  job={job}
+                  onDismiss={dismissJob}
+                  onRemove={removeJob}
+                  onView={onViewSuggestedJob}
+                />
+              ))}
+              {activeJobs.length > 5 && (
+                <button className="w-full text-center text-sm text-primary hover:text-primary/80 py-2">
+                  View all {activeJobs.length} suggested jobs
+                </button>
+              )}
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Search Bar */}
       <SearchBar

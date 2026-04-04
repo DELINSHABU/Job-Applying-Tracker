@@ -1,4 +1,4 @@
-import { useState, lazy, Suspense, useMemo } from 'react';
+import { useState, lazy, Suspense, useMemo, useEffect } from 'react';
 import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'motion/react';
 import { pageVariants, slideInRightVariants } from './lib/animations';
@@ -10,7 +10,12 @@ import { useJobs } from './hooks/useJobs';
 import { useSearch } from './hooks/useSearch';
 import { useCustomPlatforms } from './hooks/useCustomPlatforms';
 import { useDailyGoal } from './hooks/useDailyGoal';
-import type { Job, JobFormData, NavTab } from './types';
+import { usePWA } from './hooks/usePWA';
+import { getLocalDateString } from './lib/utils';
+import { UpdatePrompt } from './components/UpdatePrompt';
+import type { Job, JobFormData, NavTab, SuggestedJob } from './types';
+
+declare const __APP_VERSION__: string;
 
 // Lazy load page components (not needed on initial render)
 const InsightsPage = lazy(() => import('./components/pages/InsightsPage').then(m => ({ default: m.InsightsPage })));
@@ -21,6 +26,8 @@ const DashboardPage = lazy(() => import('./components/pages/DashboardPage').then
 const DashboardPageDesktop = lazy(() => import('./components/pages/DashboardPageDesktop').then(m => ({ default: m.DashboardPageDesktop })));
 const MissionHistoryPage = lazy(() => import('./components/pages/MissionHistoryPage').then(m => ({ default: m.MissionHistoryPage })));
 const JobsPage = lazy(() => import('./components/pages/JobsPage').then(m => ({ default: m.JobsPage })));
+const ScrapingSettingsPage = lazy(() => import('./components/pages/ScrapingSettingsPage').then(m => ({ default: m.ScrapingSettingsPage })));
+const SuggestedJobDetailsPage = lazy(() => import('./components/pages/SuggestedJobDetailsPage').then(m => ({ default: m.SuggestedJobDetailsPage })));
 
 // Lazy load modals (only needed on user interaction)
 const JobModal = lazy(() => import('./components/JobModal').then(m => ({ default: m.JobModal })));
@@ -42,6 +49,7 @@ function App() {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [editingJob, setEditingJob] = useState<Job | null>(null);
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
+  const [selectedSuggestedJob, setSelectedSuggestedJob] = useState<SuggestedJob | null>(null);
   
   // Duplicate detection state
   const [pendingJobData, setPendingJobData] = useState<JobFormData | null>(null);
@@ -86,7 +94,19 @@ function App() {
   } = useSearch(jobs);
 
   // Calculate today's job count
-  const todayDate = new Date().toISOString().split('T')[0] ?? '';
+  const [todayDate, setTodayDate] = useState(getLocalDateString());
+  
+  // Day change detection for App component
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const current = getLocalDateString();
+      if (current !== todayDate) {
+        setTodayDate(current);
+      }
+    }, 60000);
+    return () => clearInterval(interval);
+  }, [todayDate]);
+
   const todayJobCount = useMemo(() => {
     return jobs.filter(job => {
       const appliedDate = job.appliedDate;
@@ -123,6 +143,16 @@ function App() {
   };
 
   // Handlers
+  const { updateAvailable, updateNow, dismissUpdate, offlineReady, setOfflineReady } = usePWA();
+
+  // Show toast when offline ready
+  useEffect(() => {
+    if (offlineReady) {
+      toast('App ready to work offline');
+      setOfflineReady(false);
+    }
+  }, [offlineReady, setOfflineReady]);
+
   const handleAddClick = () => {
     if (!user) {
       setIsAuthModalOpen(true);
@@ -225,6 +255,20 @@ function App() {
     setActiveTab('dashboard');
   };
 
+  const handleViewSuggestedJob = (job: SuggestedJob) => {
+    setSelectedSuggestedJob(job);
+    setActiveTab('suggested-details');
+  };
+
+  const handleBackFromSuggestedDetails = () => {
+    setSelectedSuggestedJob(null);
+    setActiveTab('dashboard');
+  };
+
+  const handleOpenScrapingSettings = () => {
+    setActiveTab('scraping-settings');
+  };
+
   const handleExport = () => {
     const xmlData = jobs.map(job => `
   <application>
@@ -273,7 +317,7 @@ function App() {
           location: app.querySelector('location')?.textContent || '',
           jobListing: app.querySelector('jobListing')?.textContent || '',
           notes: app.querySelector('notes')?.textContent || '',
-          appliedDate: app.querySelector('appliedDate')?.textContent || new Date().toISOString().split('T')[0],
+          appliedDate: app.querySelector('appliedDate')?.textContent || getLocalDateString(),
         };
         await addJob(jobData);
       }
@@ -349,6 +393,7 @@ function App() {
               onLogout={handleLogout}
               onExport={handleExport}
               onImport={handleImport}
+              onOpenScrapingSettings={handleOpenScrapingSettings}
             />
           </motion.div>
         );
@@ -362,6 +407,7 @@ function App() {
             exit="exit"
           >
             <MissionHistoryPage
+              jobs={jobs}
               streakData={streakData}
               dailyGoal={dailyGoal}
               onBack={() => setActiveTab('dashboard')}
@@ -402,7 +448,27 @@ function App() {
             todayApplications={todayJobCount}
             onSetDailyGoal={handleSetDailyGoal}
             onOpenMissionHistory={() => setActiveTab('mission')}
+            onViewSuggestedJob={handleViewSuggestedJob}
           />
+        );
+      case 'scraping-settings':
+        return user ? (
+          <ScrapingSettingsPage
+            user={user}
+            onBack={handleBackFromProfile}
+          />
+        ) : (
+          <div className="text-center py-8 text-light-grey">Please sign in</div>
+        );
+      case 'suggested-details':
+        return selectedSuggestedJob && user ? (
+          <SuggestedJobDetailsPage
+            job={selectedSuggestedJob}
+            userId={user.uid}
+            onBack={handleBackFromSuggestedDetails}
+          />
+        ) : (
+          <div className="text-center py-8 text-light-grey">No job selected</div>
         );
     }
   };
@@ -478,6 +544,7 @@ function App() {
               onLogout={handleLogout}
               onExport={handleExport}
               onImport={handleImport}
+              onOpenScrapingSettings={handleOpenScrapingSettings}
             />
           </motion.div>
         );
@@ -492,6 +559,7 @@ function App() {
             className="max-w-2xl mx-auto"
           >
             <MissionHistoryPage
+              jobs={jobs}
               streakData={streakData}
               dailyGoal={dailyGoal}
               onBack={() => setActiveTab('dashboard')}
@@ -540,6 +608,43 @@ function App() {
             onOpenMissionHistory={() => setActiveTab('mission')}
           />
         );
+      case 'scraping-settings':
+        return user ? (
+          <motion.div
+            key="desktop-scraping-settings"
+            variants={pageVariants}
+            initial="initial"
+            animate="animate"
+            exit="exit"
+            className="max-w-2xl mx-auto"
+          >
+            <ScrapingSettingsPage
+              user={user}
+              onBack={handleBackFromProfile}
+            />
+          </motion.div>
+        ) : (
+          <div className="text-center py-8 text-light-grey">Please sign in</div>
+        );
+      case 'suggested-details':
+        return selectedSuggestedJob && user ? (
+          <motion.div
+            key="desktop-suggested-details"
+            variants={pageVariants}
+            initial="initial"
+            animate="animate"
+            exit="exit"
+            className="max-w-2xl mx-auto"
+          >
+            <SuggestedJobDetailsPage
+              job={selectedSuggestedJob}
+              userId={user.uid}
+              onBack={handleBackFromSuggestedDetails}
+            />
+          </motion.div>
+        ) : (
+          <div className="text-center py-8 text-light-grey">No job selected</div>
+        );
     }
   };
 
@@ -558,15 +663,15 @@ function App() {
         ) : (
           <div key="main-app" className="contents">
             {/* Mobile Layout */}
-            <div className={`lg:hidden min-h-screen bg-app-bg-light dark:bg-app-bg text-slate-900 dark:text-off-white font-display ${activeTab !== 'details' && activeTab !== 'profile' ? 'pb-24' : ''}`}>
+            <div className={`lg:hidden min-h-screen bg-app-bg-light dark:bg-app-bg text-slate-900 dark:text-off-white font-display ${activeTab !== 'details' && activeTab !== 'profile' && activeTab !== 'mission' ? 'pb-24' : ''}`}>
               <Suspense fallback={<LoadingSpinner />}>
                 <AnimatePresence mode="wait">
                   {renderMobileContent()}
                 </AnimatePresence>
               </Suspense>
 
-              {/* Bottom Navigation - hidden on detail and profile pages */}
-              {activeTab !== 'details' && activeTab !== 'profile' && (
+              {/* Bottom Navigation - hidden on detail, profile, and mission pages */}
+              {activeTab !== 'details' && activeTab !== 'profile' && activeTab !== 'mission' && (
                 <BottomNav activeTab={activeTab} onTabChange={setActiveTab} />
               )}
             </div>
@@ -636,6 +741,13 @@ function App() {
 
             {/* Toast notifications */}
             <Toaster />
+
+            {/* PWA Update Prompt */}
+            <UpdatePrompt
+              open={updateAvailable}
+              onUpdate={updateNow}
+              onLater={dismissUpdate}
+            />
           </div>
         )}
       </AnimatePresence>

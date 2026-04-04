@@ -58,13 +58,16 @@ This guide will help you set up Firebase Authentication and Firestore for your J
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Users can only read/write their own data
+    function isOwner(userId) {
+      return request.auth != null && request.auth.uid == userId;
+    }
+
+    // Users can only read/write their own root doc and any nested subcollections
     match /users/{userId} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
-      
-      // Users can only access their own job applications
-      match /jobs/{jobId} {
-        allow read, write: if request.auth != null && request.auth.uid == userId;
+      allow read, write: if isOwner(userId);
+
+      match /{document=**} {
+        allow read, write: if isOwner(userId);
       }
     }
   }
@@ -75,7 +78,8 @@ service cloud.firestore {
 
 These rules ensure that:
 - Users must be authenticated to access data
-- Users can only see and modify their own job applications
+- Users can only see and modify their own documents and subcollections
+- Features that store data outside `jobs` (such as profile, scraping settings, suggested jobs, goals, and streak stats) can load and save correctly
 - Data is private and secure per user
 
 ## Step 5: Configure Your Application

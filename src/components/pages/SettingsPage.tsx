@@ -3,17 +3,21 @@ import { useTheme } from '../../contexts/ThemeContext';
 import { usePWA } from '../../hooks/usePWA';
 import type { User, Job } from '../../types';
 
+declare const __APP_VERSION__: string;
+
 interface SettingsPageProps {
   user: User | null;
   jobs: Job[];
   onLogout: () => void;
   onExport: () => void;
   onImport: () => void;
+  onOpenScrapingSettings?: () => void;
 }
 
-export function SettingsPage({ user, jobs, onLogout, onExport, onImport }: SettingsPageProps) {
+export function SettingsPage({ user, jobs, onLogout, onExport, onImport, onOpenScrapingSettings }: SettingsPageProps) {
   const { theme, toggleTheme } = useTheme();
-  const { isInstallable, isStandalone, installApp } = usePWA();
+  const { isInstallable, isStandalone, installApp, checkForUpdate } = usePWA();
+  const appVersion = typeof __APP_VERSION__ !== 'undefined' ? __APP_VERSION__ : '2.0.0';
 
   const getInitials = (user: User | null) => {
     if (!user) return '?';
@@ -101,6 +105,25 @@ export function SettingsPage({ user, jobs, onLogout, onExport, onImport }: Setti
       <div className="mb-8">
         <h3 className="px-1 mb-2 text-xs font-semibold text-slate-400 dark:text-light-grey uppercase tracking-wider">Data Management</h3>
         <div className="bg-white dark:bg-card-bg rounded-xl shadow-sm border border-slate-200 dark:border-card-border overflow-hidden">
+          {/* Scraping Settings */}
+          {user && onOpenScrapingSettings && (
+            <Button
+              variant="ghost"
+              onClick={onOpenScrapingSettings}
+              className="w-full flex items-center justify-between p-4 h-auto rounded-none border-b border-slate-100 dark:border-card-border active:bg-slate-50 dark:active:bg-card-border"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-lg bg-purple-50 dark:bg-purple-900/20 flex items-center justify-center text-purple-600 dark:text-purple-400">
+                  <span className="material-icons-round text-xl">auto_awesome</span>
+                </div>
+                <div className="text-left">
+                  <p className="font-medium leading-none mb-1 text-slate-900 dark:text-off-white">Job Scraping</p>
+                  <p className="text-[11px] text-slate-400 dark:text-light-grey">Configure job discovery</p>
+                </div>
+              </div>
+              <span className="material-icons-round text-slate-300 dark:text-light-grey text-xl">chevron_right</span>
+            </Button>
+          )}
           {/* Export */}
           <Button
             variant="ghost"
@@ -164,6 +187,29 @@ export function SettingsPage({ user, jobs, onLogout, onExport, onImport }: Setti
         </div>
       </div>
 
+      {/* App Updates Group */}
+      <div className="mb-8">
+        <h3 className="px-1 mb-2 text-xs font-semibold text-slate-400 dark:text-light-grey uppercase tracking-wider">App Updates</h3>
+        <div className="bg-white dark:bg-card-bg rounded-xl shadow-sm border border-slate-200 dark:border-card-border overflow-hidden">
+          <Button
+            variant="ghost"
+            onClick={checkForUpdate}
+            className="w-full flex items-center justify-between p-4 h-auto rounded-none border-b border-slate-100 dark:border-card-border active:bg-slate-50 dark:active:bg-card-border"
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+                <span className="material-icons-round text-xl">system_update</span>
+              </div>
+              <div className="text-left">
+                <p className="font-medium leading-none mb-1 text-slate-900 dark:text-off-white">Check for Updates</p>
+                <p className="text-[11px] text-slate-400 dark:text-light-grey">Current: v{appVersion}</p>
+              </div>
+            </div>
+            <span className="material-icons-round text-slate-300 dark:text-light-grey text-xl">chevron_right</span>
+          </Button>
+        </div>
+      </div>
+
       {/* Install App Section */}
       {!isStandalone && (
         <div className="mb-8">
@@ -204,7 +250,7 @@ export function SettingsPage({ user, jobs, onLogout, onExport, onImport }: Setti
 
       {/* Version Info */}
       <div className="text-center mt-8 space-y-1">
-        <p className="text-xs text-slate-400 dark:text-light-grey">Version 2.0.0 (React)</p>
+        <p className="text-xs text-slate-400 dark:text-light-grey">Version {appVersion} (React)</p>
         <p className="text-[10px] text-slate-300 dark:text-light-grey/50">Built with React + TypeScript + Vite</p>
       </div>
     </main>

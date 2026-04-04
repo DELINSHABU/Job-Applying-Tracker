@@ -9,6 +9,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { DeleteConfirmDialog } from './DeleteConfirmDialog';
+import { getLocalDateString } from '../lib/utils';
 import type { Job, JobFormData, JobStatus, Platform } from '../types';
 
 interface JobModalProps {
@@ -97,7 +98,7 @@ export function JobModal({ isOpen, onClose, onSave, job, customPlatforms = [], o
     email: '',
     phone: '',
     jobPostDate: '',
-    appliedDate: new Date().toISOString().split('T')[0],
+    appliedDate: getLocalDateString(),
     platform: 'linkedin',
     status: 'pending',
     notes: '',
@@ -107,6 +108,7 @@ export function JobModal({ isOpen, onClose, onSave, job, customPlatforms = [], o
   const [customPlatform, setCustomPlatform] = useState('');
   const [showDeletePlatformConfirm, setShowDeletePlatformConfirm] = useState(false);
   const [platformToDelete, setPlatformToDelete] = useState<string | null>(null);
+  const [isEditingAppliedDate, setIsEditingAppliedDate] = useState(false);
 
   // Combine predefined platforms with custom ones
   const allPlatforms = useMemo(() => {
@@ -152,7 +154,7 @@ export function JobModal({ isOpen, onClose, onSave, job, customPlatforms = [], o
         email: '',
         phone: '',
         jobPostDate: '',
-        appliedDate: new Date().toISOString().split('T')[0],
+        appliedDate: getLocalDateString(),
         platform: 'linkedin',
         status: 'pending',
         notes: '',
@@ -187,6 +189,17 @@ export function JobModal({ isOpen, onClose, onSave, job, customPlatforms = [], o
     setShowDeletePlatformConfirm(false);
   };
 
+  const formatDisplayDate = (dateStr: string) => {
+    if (!dateStr) return 'Not set';
+    try {
+      const date = new Date(dateStr);
+      if (isNaN(date.getTime())) return dateStr;
+      return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    } catch {
+      return dateStr;
+    }
+  };
+
   return (
     <>
       <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
@@ -203,13 +216,7 @@ export function JobModal({ isOpen, onClose, onSave, job, customPlatforms = [], o
             <h1 className="text-lg font-semibold tracking-tight text-slate-900 dark:text-white">
               {job ? 'Edit Application' : 'Add New Application'}
             </h1>
-            <button
-              type="button"
-              onClick={handleSubmit}
-              className="text-primary font-semibold px-2 py-1 hover:text-primary/80 transition-colors"
-            >
-              Save
-            </button>
+            <div className="w-10" /> {/* Spacer to keep title centered */}
           </header>
 
           {/* Form Content */}
@@ -407,13 +414,43 @@ export function JobModal({ isOpen, onClose, onSave, job, customPlatforms = [], o
                   onChange={(e) => handleChange('jobPostDate', e.target.value)}
                   className="[color-scheme:light] dark:[color-scheme:dark]"
                 />
-                <FormInput
-                  label="Date Applied"
-                  type="date"
-                  value={formData.appliedDate}
-                  onChange={(e) => handleChange('appliedDate', e.target.value)}
-                  className="[color-scheme:light] dark:[color-scheme:dark]"
-                />
+                
+                <div className="space-y-2">
+                  <label className="block text-sm font-medium text-slate-600 dark:text-slate-300 mb-2">
+                    Date Applied
+                  </label>
+                  <div className={`relative w-full bg-muted dark:bg-surface-container-high border border-input dark:border-border rounded-xl h-[52px] flex items-center px-4 transition-all ${isEditingAppliedDate ? 'ring-2 ring-primary/40 border-primary/50' : ''}`}>
+                    <span className="material-symbols-outlined text-lg text-slate-400 mr-3">
+                      history_edu
+                    </span>
+                    
+                    {isEditingAppliedDate ? (
+                      <input
+                        type="date"
+                        value={formData.appliedDate}
+                        onChange={(e) => handleChange('appliedDate', e.target.value)}
+                        onBlur={() => setIsEditingAppliedDate(false)}
+                        autoFocus
+                        className="flex-1 bg-transparent border-none outline-none text-foreground dark:text-white text-sm [color-scheme:light] dark:[color-scheme:dark]"
+                      />
+                    ) : (
+                      <div className="flex-1 flex items-center justify-between">
+                        <span className="text-sm font-semibold text-slate-900 dark:text-white">
+                          {formData.appliedDate === getLocalDateString() 
+                            ? 'Today' 
+                            : formatDisplayDate(formData.appliedDate || '')}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => setIsEditingAppliedDate(true)}
+                          className="p-1 rounded-md hover:bg-slate-200 dark:hover:bg-white/10 text-primary transition-colors"
+                        >
+                          <span className="material-symbols-outlined text-lg">edit_calendar</span>
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
               </div>
             </section>
 

@@ -6,6 +6,7 @@ import type { JobStats } from '../types';
 
 interface StatsCardsProps {
   stats: JobStats;
+  suggestedCount?: number;
 }
 
 interface StatCardProps {
@@ -14,28 +15,34 @@ interface StatCardProps {
   value: number;
   label: string;
   delay?: number;
+  isCompact?: boolean;
+  className?: string;
 }
 
-function StatCard({ icon, iconColor, value, label, delay = 0 }: StatCardProps) {
+function StatCard({ icon, iconColor, value, label, delay = 0, isCompact = false, className = "" }: StatCardProps) {
   const displayValue = useCountUp(value, { delay });
   
   return (
-    <motion.div variants={staggerItemVariants}>
-      <Card className="min-w-[140px] bg-white dark:bg-card-bg rounded-2xl border-slate-200 dark:border-card-border flex-shrink-0">
-        <CardContent className="p-4">
-          <span className={`material-icons-round mb-2 ${iconColor}`}>{icon}</span>
-          <div className="text-2xl font-bold text-slate-900 dark:text-off-white">{displayValue}</div>
-          <div className="text-xs text-slate-500 dark:text-light-grey">{label}</div>
+    <motion.div variants={staggerItemVariants} className={`w-full ${className}`}>
+      <Card className={`bg-white dark:bg-card-bg rounded-2xl border-slate-200 dark:border-card-border ${isCompact ? 'p-0' : ''}`}>
+        <CardContent className={`flex items-center gap-2.5 ${isCompact ? 'p-2.5' : 'p-4'}`}>
+          <div className={`flex items-center justify-center rounded-lg ${isCompact ? 'w-8 h-8' : 'w-10 h-10'} bg-slate-50 dark:bg-white/5 flex-shrink-0`}>
+            <span className={`material-icons-round ${isCompact ? 'text-base' : 'text-xl'} ${iconColor}`}>{icon}</span>
+          </div>
+          <div className="min-w-0">
+            <div className={`${isCompact ? 'text-base' : 'text-xl'} font-bold text-slate-900 dark:text-off-white leading-none`}>{displayValue}</div>
+            <div className={`${isCompact ? 'text-[10px]' : 'text-xs'} text-slate-500 dark:text-light-grey truncate font-medium mt-0.5`}>{label}</div>
+          </div>
         </CardContent>
       </Card>
     </motion.div>
   );
 }
 
-export function StatsCards({ stats }: StatsCardsProps) {
+export function StatsCards({ stats, suggestedCount = 0 }: StatsCardsProps) {
   return (
     <motion.div 
-      className="flex gap-4 overflow-x-auto pb-2 px-5"
+      className="grid grid-cols-2 gap-3 md:flex md:gap-4 md:overflow-x-auto md:pb-2 md:px-5"
       variants={staggerContainerVariants}
       initial="initial"
       animate="animate"
@@ -44,8 +51,10 @@ export function StatsCards({ stats }: StatsCardsProps) {
         icon="send" 
         iconColor="text-primary" 
         value={stats.total} 
-        label="Total Applied"
+        label="Applied"
         delay={0}
+        isCompact={false}
+        className="col-span-1"
       />
       <StatCard 
         icon="hourglass_empty" 
@@ -53,13 +62,17 @@ export function StatsCards({ stats }: StatsCardsProps) {
         value={stats.pending} 
         label="Pending"
         delay={0.1}
+        isCompact={false}
+        className="col-span-1"
       />
       <StatCard 
         icon="chat_bubble_outline" 
         iconColor="text-emerald-500" 
         value={stats.interviewing + stats.callback} 
-        label="Interviews"
+        label="Interviewed"
         delay={0.2}
+        isCompact={false}
+        className="col-span-1"
       />
       <StatCard 
         icon="cancel" 
@@ -67,7 +80,20 @@ export function StatsCards({ stats }: StatsCardsProps) {
         value={stats.rejected} 
         label="Rejected"
         delay={0.3}
+        isCompact={false}
+        className="col-span-1"
       />
+      {suggestedCount > 0 && (
+        <StatCard 
+          icon="auto_awesome" 
+          iconColor="text-purple-500" 
+          value={suggestedCount} 
+          label="Suggested"
+          delay={0.4}
+          isCompact={false}
+          className="col-span-1"
+        />
+      )}
     </motion.div>
   );
 }

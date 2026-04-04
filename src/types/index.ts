@@ -126,7 +126,7 @@ export interface FilterOptions {
 }
 
 // Navigation tabs
-export type NavTab = 'dashboard' | 'jobs' | 'insights' | 'settings' | 'details' | 'profile' | 'mission';
+export type NavTab = 'dashboard' | 'jobs' | 'insights' | 'settings' | 'details' | 'profile' | 'mission' | 'scraping-settings' | 'suggested-details';
 
 // AI Provider options
 export type AIProvider = 'gemini' | 'openai' | 'anthropic' | 'grok';
@@ -140,9 +140,11 @@ export interface UserProfile {
   location?: string;
   
   // Professional info
+  profession?: string; // e.g., "Software Engineer", "Data Analyst"
   skills: string[];
   experienceSummary?: string;
-  resumeUrl?: string;
+  cvUrl?: string; // Base64 or URL to uploaded CV
+  cvText?: string; // Extracted text from CV for parsing
   portfolioUrl?: string;
   githubUrl?: string;
   
@@ -150,6 +152,10 @@ export interface UserProfile {
   targetSalaryMin?: number;
   targetSalaryMax?: number;
   preferredLocations: string[];
+  
+  // Scraping configuration
+  scrapingKeywords?: string[]; // Separate from skills for search
+  preferredPlatforms?: string[]; // Platforms to scrape from
   
   // AI configuration
   aiProvider: AIProvider;
@@ -168,14 +174,18 @@ export const DEFAULT_PROFILE: Omit<UserProfile, 'createdAt' | 'updatedAt'> = {
   email: '',
   phone: '',
   location: '',
+  profession: '',
   skills: [],
   experienceSummary: '',
-  resumeUrl: '',
+  cvUrl: '',
+  cvText: '',
   portfolioUrl: '',
   githubUrl: '',
   targetSalaryMin: undefined,
   targetSalaryMax: undefined,
   preferredLocations: [],
+  scrapingKeywords: [],
+  preferredPlatforms: [],
   aiProvider: 'gemini',
   onboardingComplete: false,
 };
@@ -204,4 +214,69 @@ export interface GoalHistory {
   actualApplications: number;
   completed: boolean;
   streakAtCompletion: number;
+}
+
+// Suggested job from scraping
+export interface SuggestedJob {
+  id: string;
+  // Basic info
+  companyName: string;
+  position: string;
+  jobListing: string; // URL to original listing
+  description?: string;
+  salary?: string;
+  location?: string;
+  
+  // Source info
+  platform: Platform;
+  jobPostDate?: string;
+  fetchedAt: string; // When we scraped it
+  
+  // Matching info
+  skills?: string[];
+  fitScore?: number;
+  
+  // User actions
+  dismissed: boolean;
+  applied: boolean; // If user marked as applied
+  appliedJobId?: string; // Link to actual applied job if converted
+  
+  // Raw data for reference
+  rawData?: Record<string, unknown>;
+}
+
+// Scraping settings per user
+export interface ScrapingSettings {
+  id: string;
+  userId: string;
+  
+  // Target platforms
+  platforms: string[];
+  
+  // Search parameters
+  keywords: string[]; // Combined from profile + manual additions
+  locations: string[]; // Support multiple locations
+  remoteOnly?: boolean;
+  
+  // Filters
+  minSalary?: number;
+  maxSalary?: number;
+  experienceLevel?: 'entry' | 'mid' | 'senior' | 'all';
+  
+  // Authentication (stored separately for security)
+  // Cookie tokens stored encrypted in localStorage
+  loginSessions?: {
+    linkedin?: string;
+    naukri?: string;
+    naukrigulf?: string;
+    [key: string]: string | undefined;
+  };
+  
+  // Refresh settings
+  lastRefreshAt?: string;
+  autoRefresh: boolean;
+  
+  // Created/updated
+  createdAt: string;
+  updatedAt: string;
 }

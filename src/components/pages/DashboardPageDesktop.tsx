@@ -6,6 +6,7 @@ import { DesktopStatsCards } from '../DesktopStatsCards';
 import { SetDailyGoalModal } from '../SetDailyGoalModal';
 import { Job, JobStats, StreakData, DailyGoal } from '../../types';
 import { staggerContainerVariants } from '../../lib/animations';
+import { getLocalDateString } from '../../lib/utils';
 
 interface DashboardPageDesktopProps {
   jobs: Job[];
@@ -47,7 +48,7 @@ export function DashboardPageDesktop({
   const progress = targetApplications > 0 ? currentApplications / targetApplications : 0;
   const isGoalCompleted = currentApplications >= targetApplications;
 
-  const today = new Date().toISOString().split('T')[0] ?? '';
+  const today = getLocalDateString();
   const todayJobs = jobs.filter(j => {
     const appliedDate = j.appliedDate;
     return appliedDate?.startsWith(today);

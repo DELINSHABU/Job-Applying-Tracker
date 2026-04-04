@@ -11,6 +11,14 @@ export function LoadingScreen() {
 
   return (
     <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-app-bg-light dark:bg-app-bg transition-colors duration-300 p-6">
+      {/* Hidden elements to force font loading */}
+      <div className="sr-only opacity-0 pointer-events-none absolute" aria-hidden="true">
+        <span className="material-symbols-outlined">rocket</span>
+        <span className="material-icons-round">check</span>
+        <span style={{ fontFamily: 'Inter', fontWeight: 400 }}>preload</span>
+        <span style={{ fontFamily: 'Inter', fontWeight: 700 }}>preload</span>
+      </div>
+
       <div className="relative">
         {/* Animated Background Pulse */}
         <motion.div

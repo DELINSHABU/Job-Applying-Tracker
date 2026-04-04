@@ -80,62 +80,67 @@ export function JobCard({ job, onEdit, onDelete, onView }: JobCardProps) {
   };
 
   return (
-    <div 
-      className="bg-white dark:bg-card-bg p-4 rounded-2xl shadow-sm border border-slate-200 dark:border-card-border hover:border-primary/50 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 cursor-pointer"
-      onClick={() => onView?.(job)}
-    >
-      <div className="flex justify-between items-start mb-3">
-        <div className="flex gap-3">
-          <div className={`w-12 h-12 rounded-xl ${companyIcon.bgColor} border border-${companyIcon.iconColor.replace('text-', '')}/50 flex items-center justify-center`}>
-            <span className={`material-icons-round ${companyIcon.iconColor}`}>{companyIcon.icon}</span>
+    <>
+      <div 
+        className="bg-white dark:bg-card-bg p-4 rounded-2xl shadow-sm border border-slate-200 dark:border-card-border hover:border-primary/50 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 cursor-pointer"
+        onClick={() => onView?.(job)}
+      >
+        <div className="flex justify-between items-start mb-3">
+          <div className="flex gap-3">
+            <div className={`w-12 h-12 rounded-xl ${companyIcon.bgColor} border border-${companyIcon.iconColor.replace('text-', '')}/50 flex items-center justify-center`}>
+              <span className={`material-icons-round ${companyIcon.iconColor}`}>{companyIcon.icon}</span>
+            </div>
+            <div>
+              <h3 className="font-bold text-slate-900 dark:text-off-white">{job.companyName}</h3>
+              <p className="text-sm text-slate-500 dark:text-light-grey">{job.position}</p>
+            </div>
           </div>
-          <div>
-            <h3 className="font-bold text-slate-900 dark:text-off-white">{job.companyName}</h3>
-            <p className="text-sm text-slate-500 dark:text-light-grey">{job.position}</p>
-          </div>
+          <span className={`px-3 py-1 ${statusStyle.bg} ${statusStyle.text} text-[10px] font-bold uppercase tracking-wider rounded-full border ${statusStyle.border}`}>
+            {job.status}
+          </span>
         </div>
-        <span className={`px-3 py-1 ${statusStyle.bg} ${statusStyle.text} text-[10px] font-bold uppercase tracking-wider rounded-full border ${statusStyle.border}`}>
-          {job.status}
-        </span>
-      </div>
-      
-      <div className="grid grid-cols-2 gap-y-3 mt-4 border-t border-slate-100 dark:border-card-border pt-4">
-        {job.location && (
+        
+        <div className="grid grid-cols-2 gap-y-3 mt-4 border-t border-slate-100 dark:border-card-border pt-4">
+          {job.location && (
+            <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-light-grey">
+              <span className="material-icons-round text-sm">location_on</span>
+              {job.location}
+            </div>
+          )}
           <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-light-grey">
-            <span className="material-icons-round text-sm">location_on</span>
-            {job.location}
+            <span className="material-icons-round text-sm">payments</span>
+            {job.salary || 'N/A'}
           </div>
-        )}
-        <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-light-grey">
-          <span className="material-icons-round text-sm">payments</span>
-          {job.salary || 'N/A'}
+          <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-light-grey">
+            <span className="material-icons-round text-sm">calendar_today</span>
+            Applied {formatDate(job.appliedDate)}
+          </div>
+          <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-light-grey">
+            <span className="material-icons-round text-sm">link</span>
+            {job.platform}
+          </div>
         </div>
-        <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-light-grey">
-          <span className="material-icons-round text-sm">calendar_today</span>
-          Applied {formatDate(job.appliedDate)}
-        </div>
-        <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-light-grey">
-          <span className="material-icons-round text-sm">link</span>
-          {job.platform}
-        </div>
-      </div>
 
-      {/* Action buttons */}
-      <div className="flex gap-2 mt-4 pt-4 border-t border-slate-100 dark:border-card-border">
-        <Button
-          variant="secondary"
-          onClick={(e) => { e.stopPropagation(); onEdit(job); }}
-          className="flex-1 bg-primary/20 text-primary hover:bg-primary/30"
+        {/* Action buttons */}
+        <div 
+          className="flex gap-2 mt-4 pt-4 border-t border-slate-100 dark:border-card-border"
+          onClick={(e) => e.stopPropagation()}
         >
-          Edit
-        </Button>
-        <Button
-          variant="secondary"
-          onClick={(e) => { e.stopPropagation(); setShowDeleteDialog(true); }}
-          className="flex-1 bg-rose-500/20 text-rose-400 hover:bg-rose-500/30"
-        >
-          Delete
-        </Button>
+          <Button
+            variant="secondary"
+            onClick={(e) => { e.stopPropagation(); onEdit(job); }}
+            className="flex-1 bg-primary/20 text-primary hover:bg-primary/30"
+          >
+            Edit
+          </Button>
+          <Button
+            variant="secondary"
+            onClick={(e) => { e.stopPropagation(); setShowDeleteDialog(true); }}
+            className="flex-1 bg-rose-500/20 text-rose-400 hover:bg-rose-500/30"
+          >
+            Delete
+          </Button>
+        </div>
       </div>
 
       {/* Delete Confirmation Dialog */}
@@ -144,6 +149,6 @@ export function JobCard({ job, onEdit, onDelete, onView }: JobCardProps) {
         onOpenChange={setShowDeleteDialog}
         onConfirm={handleDelete}
       />
-    </div>
+    </>
   );
 }

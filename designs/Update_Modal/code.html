@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>HireTrackAI - Update Available</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;family=Manrope:wght@300;400;500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-tertiary-container": "#00311f",
+                        "on-background": "#dfe2f4",
+                        "secondary-fixed-dim": "#ffb95f",
+                        "surface-container": "#1b1f2c",
+                        "background": "#080C18",
+                        "outline": "#958ea0",
+                        "on-tertiary-fixed-variant": "#005236",
+                        "primary": "#8B5CF6",
+                        "on-primary-fixed-variant": "#5516be",
+                        "on-primary-container": "#340080",
+                        "on-surface": "#dfe2f4",
+                        "surface": "#0f131f",
+                        "inverse-surface": "#dfe2f4",
+                        "primary-fixed": "#e9ddff",
+                        "primary-container": "#a078ff",
+                        "surface-container-high": "#262a37",
+                        "on-tertiary": "#003824",
+                        "tertiary": "#4edea3",
+                        "surface-bright": "#353946",
+                        "on-secondary-container": "#5b3800",
+                        "surface-container-lowest": "#0a0e1a",
+                        "outline-variant": "#494454",
+                        "surface-container-low": "#171b28",
+                        "on-error": "#690005",
+                        "secondary": "#F59E0B",
+                        "inverse-on-surface": "#2c303d",
+                        "tertiary-fixed-dim": "#4edea3",
+                        "tertiary-container": "#00a572",
+                        "inverse-primary": "#6d3bd7",
+                        "on-tertiary-fixed": "#002113",
+                        "tertiary-fixed": "#6ffbbe",
+                        "on-secondary": "#472a00",
+                        "on-primary": "#3c0091",
+                        "surface-variant": "#303442",
+                        "surface-tint": "#d0bcff",
+                        "on-secondary-fixed-variant": "#653e00",
+                        "error-container": "#93000a",
+                        "on-secondary-fixed": "#2a1700",
+                        "primary-fixed-dim": "#d0bcff",
+                        "surface-dim": "#0f131f",
+                        "error": "#ffb4ab",
+                        "surface-container-highest": "#303442",
+                        "secondary-container": "#ee9800",
+                        "on-surface-variant": "#cbc3d7",
+                        "on-primary-fixed": "#23005c",
+                        "secondary-fixed": "#ffddb8",
+                        "on-error-container": "#ffdad6"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "fontFamily": {
+                        "headline": ["Space Grotesk"],
+                        "body": ["Manrope"],
+                        "label": ["Manrope"]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .glass-panel {
+            background: rgba(14, 21, 37, 0.7);
+            backdrop-filter: blur(20px);
+        }
+        .mission-gradient {
+            background: linear-gradient(135deg, #8B5CF6 0%, #F59E0B 100%);
+        }
+        .update-glow {
+            box-shadow: 0 0 40px -10px rgba(139, 92, 246, 0.3);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="bg-background text-on-background font-body min-h-screen flex items-center justify-center p-4 selection:bg-primary/30">
+<!-- Screen Content Underneath (Simulated) -->
+<div class="fixed inset-0 overflow-hidden pointer-events-none opacity-20">
+<div class="max-w-md mx-auto p-6 space-y-6">
+<div class="h-8 w-3/4 bg-surface-container rounded-lg"></div>
+<div class="grid grid-cols-2 gap-4">
+<div class="h-32 bg-surface-container rounded-2xl"></div>
+<div class="h-32 bg-surface-container rounded-2xl"></div>
+</div>
+<div class="h-64 bg-surface-container rounded-2xl"></div>
+</div>
+</div>
+<!-- Backdrop Overlay -->
+<div class="fixed inset-0 bg-background/60 backdrop-blur-sm z-40"></div>
+<!-- Modal Container -->
+<main class="relative z-50 w-full max-w-sm">
+<div class="bg-surface-container-low rounded-[2rem] p-1 shadow-2xl update-glow overflow-hidden">
+<!-- Decorative Inner Border -->
+<div class="bg-surface-container-lowest rounded-[1.9rem] p-8 flex flex-col items-center text-center">
+<!-- Illustration/Icon Section -->
+<div class="relative mb-8">
+<div class="absolute inset-0 bg-primary/20 blur-3xl rounded-full"></div>
+<div class="relative w-24 h-24 flex items-center justify-center bg-surface-container-high rounded-full border border-primary/20">
+<span class="material-symbols-outlined text-5xl text-secondary" style="font-variation-settings: 'FILL' 1;">rocket_launch</span>
+<div class="absolute -top-1 -right-1 flex h-6 w-6">
+<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+<span class="relative inline-flex rounded-full h-6 w-6 bg-primary items-center justify-center">
+</span>
+</div>
+</div>
+</div>
+<!-- Header -->
+<h1 class="font-headline text-3xl font-bold tracking-tight text-on-surface mb-2">
+                    Mission Update Ready
+                </h1>
+<p class="text-on-surface-variant text-sm px-4 leading-relaxed font-medium">
+                    Version 2.0 is now available with improved AI features.
+                </p>
+<!-- Change Log Section -->
+<!-- Action Buttons -->
+<div class="w-full mt-10 space-y-3">
+<button class="w-full py-4 rounded-xl mission-gradient text-on-primary font-bold text-base tracking-wide active:scale-[0.98] transition-all shadow-lg shadow-primary/20">
+                        Update Now
+                    </button>
+<button class="w-full py-3 rounded-xl text-on-surface-variant font-medium text-sm hover:text-on-surface transition-colors active:scale-[0.98]">
+                        Maybe Later
+                    </button>
+</div>
+<!-- Footer Metatag -->
+</div>
+</div>
+</main>
+<!-- Invisible Bottom Nav for Frame Context -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 py-3 pb-8 bg-[#0E1525]/90 backdrop-blur-lg rounded-t-2xl opacity-40">
+<div class="flex flex-col items-center justify-center text-slate-500">
+<span class="material-symbols-outlined">work</span>
+<span class="font-['JetBrains_Mono'] text-[10px] uppercase tracking-widest mt-1">Applications</span>
+</div>
+<div class="flex flex-col items-center justify-center text-slate-500">
+<span class="material-symbols-outlined">analytics</span>
+<span class="font-['JetBrains_Mono'] text-[10px] uppercase tracking-widest mt-1">Analytics</span>
+</div>
+<div class="flex flex-col items-center justify-center text-slate-500">
+<span class="material-symbols-outlined">tune</span>
+<span class="font-['JetBrains_Mono'] text-[10px] uppercase tracking-widest mt-1">Settings</span>
+</div>
+</nav>
+</body></html>

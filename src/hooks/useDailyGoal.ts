@@ -1,16 +1,17 @@
 import { useState, useEffect, useCallback } from 'react';
 import { db } from '../services/firebase';
 import { doc, setDoc, onSnapshot, runTransaction, collection, addDoc } from 'firebase/firestore';
+import { getLocalDateString } from '../lib/utils';
 import type { DailyGoal, StreakData, GoalHistory } from '../types';
 
 function getTodayDate(): string {
-  return new Date().toISOString().split('T')[0] ?? '';
+  return getLocalDateString();
 }
 
 function getYesterdayDate(): string {
   const yesterday = new Date();
   yesterday.setDate(yesterday.getDate() - 1);
-  return yesterday.toISOString().split('T')[0] ?? '';
+  return getLocalDateString(yesterday);
 }
 
 const STREAK_MILESTONES = [7, 14, 21, 30, 60, 100];
@@ -36,9 +37,21 @@ export function useDailyGoal(userId: string | null, todayJobCount: number, onStr
     lastCompletedDate: null,
   });
   const [loading, setLoading] = useState(true);
+  const [todayDate, setTodayDate] = useState(getTodayDate());
 
-  const todayDate = getTodayDate();
   const todayApplications = todayJobCount;
+
+  // Day change detection
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const current = getTodayDate();
+      if (current !== todayDate) {
+        setTodayDate(current);
+      }
+    }, 60000); // Check every minute
+
+    return () => clearInterval(interval);
+  }, [todayDate]);
 
   // Real-time subscription for daily goal and streak
   useEffect(() => {

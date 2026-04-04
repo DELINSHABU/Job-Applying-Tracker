@@ -1,4 +1,5 @@
 import { Button } from '../ui/button';
+import { toast } from 'sonner';
 import type { Job, JobStatus } from '../../types';
 
 interface JobDetailsPageProps {
@@ -39,6 +40,14 @@ export function JobDetailsPage({ job, onBack, onEdit }: JobDetailsPageProps) {
     if (job.jobListing) {
       window.open(job.jobListing, '_blank');
     }
+  };
+
+  const copyToClipboard = (text: string, label: string) => {
+    navigator.clipboard.writeText(text).then(() => {
+      toast.success(`${label} copied to clipboard`);
+    }).catch(() => {
+      toast.error('Failed to copy link');
+    });
   };
 
   return (
@@ -132,14 +141,45 @@ export function JobDetailsPage({ job, onBack, onEdit }: JobDetailsPageProps) {
               <p className="text-xs text-slate-500 dark:text-light-grey mb-1">Applied Date</p>
               <p className="text-sm font-semibold text-slate-900 dark:text-off-white">{formatDate(job.appliedDate)}</p>
             </div>
+            {job.jobListing && (
+              <div className="col-span-2 p-4 rounded-xl bg-white dark:bg-card-bg border border-slate-200 dark:border-card-border">
+                <div className="flex justify-between items-start mb-1">
+                  <p className="text-xs text-slate-500 dark:text-light-grey">Job Listing</p>
+                  <button 
+                    onClick={() => copyToClipboard(job.jobListing!, 'Job link')}
+                    className="p-1 -mr-1 rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-primary transition-colors"
+                    title="Copy to clipboard"
+                  >
+                    <span className="material-icons-round text-xs">content_copy</span>
+                  </button>
+                </div>
+                <a 
+                  href={job.jobListing.startsWith('http') ? job.jobListing : `https://${job.jobListing}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm font-semibold text-primary hover:underline break-all block pr-6"
+                >
+                  {job.jobListing}
+                </a>
+              </div>
+            )}
             {job.website && (
               <div className="col-span-2 p-4 rounded-xl bg-white dark:bg-card-bg border border-slate-200 dark:border-card-border">
-                <p className="text-xs text-slate-500 dark:text-light-grey mb-1">Website</p>
+                <div className="flex justify-between items-start mb-1">
+                  <p className="text-xs text-slate-500 dark:text-light-grey">Website</p>
+                  <button 
+                    onClick={() => copyToClipboard(job.website!, 'Website link')}
+                    className="p-1 -mr-1 rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-primary transition-colors"
+                    title="Copy to clipboard"
+                  >
+                    <span className="material-icons-round text-xs">content_copy</span>
+                  </button>
+                </div>
                 <a 
                   href={job.website.startsWith('http') ? job.website : `https://${job.website}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-sm font-semibold text-primary hover:underline break-all"
+                  className="text-sm font-semibold text-primary hover:underline break-all block pr-6"
                 >
                   {job.website}
                 </a>
