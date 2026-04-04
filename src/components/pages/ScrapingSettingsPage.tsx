@@ -3,10 +3,24 @@ import { toast } from 'sonner';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Badge } from '../ui/badge';
+import { Progress } from '../ui/progress';
+import { ChipSelector } from '../ui/chip-selector';
 import { getSupportedPlatforms } from '../../services/scraping';
 import { useScrapingSettings } from '../../hooks/useScrapingSettings';
 import { useSuggestedJobs } from '../../hooks/useSuggestedJobs';
 import { useProfile } from '../../hooks/useProfile';
+import { useScrapingProgress } from '../../hooks/useScrapingProgress';
+import { useScrapingPoller } from '../../hooks/useScrapingPoller';
+import { startMission } from '../../hooks/useScrapingPoller';
+import {
+  JOB_ROLES,
+  TECH_KEYWORDS,
+  LOCATIONS,
+  EXPERIENCE_LEVELS,
+  JOB_TYPES,
+  WORK_ARRANGEMENTS,
+  POSTED_WITHIN,
+} from '../../constants/scrapingOptions';
 import type { User } from '../../types';
 
 interface ScrapingSettingsPageProps {
@@ -32,16 +46,15 @@ export function ScrapingSettingsPage({ user, onBack }: ScrapingSettingsPageProps
   } = useProfile(user?.uid || null, user?.email || null, user?.displayName || null);
 
   const {
-    refreshing,
-    refreshJobs,
     activeJobs,
     lastRefreshTime,
   } = useSuggestedJobs(user?.uid || null);
 
+  const mission = useScrapingProgress();
+  const { startPolling, stopScraping, isStopping: pollerStopping } = useScrapingPoller(user?.uid || null);
+
   const [apifyTokenInput, setApifyTokenInput] = useState('');
   const [tokenSaved, setTokenSaved] = useState(false);
-  const [keywordInput, setKeywordInput] = useState('');
-  const [locationInput, setLocationInput] = useState('');
   const [isSaving, setIsSaving] = useState(false);
 
   const platforms = getSupportedPlatforms();
@@ -52,6 +65,12 @@ export function ScrapingSettingsPage({ user, onBack }: ScrapingSettingsPageProps
       handleCheckToken();
     }
   }, [user?.uid, settingsLoading]);
+
+  useEffect(() => {
+    if (mission.status === 'running' && user?.uid) {
+      startPolling();
+    }
+  }, [mission.status, user?.uid, startPolling]);
 
   const handleSaveApifyToken = async () => {
     if (!apifyTokenInput.trim()) {
@@ -105,76 +124,8 @@ export function ScrapingSettingsPage({ user, onBack }: ScrapingSettingsPageProps
     }
   };
 
-  const addKeyword = async () => {
-    if (!keywordInput.trim() || isSaving) return;
-    const trimmed = keywordInput.trim();
-    if (settings?.keywords?.includes(trimmed)) {
-      toast.error('Keyword already exists');
-      return;
-    }
-    try {
-      setIsSaving(true);
-      const newKeywords = [...(settings?.keywords || []), trimmed];
-      await updateSettings({ keywords: newKeywords });
-      setKeywordInput('');
-      toast.success('Keyword added');
-    } catch (err) {
-      toast.error('Failed to add keyword');
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
-  const removeKeyword = async (keyword: string) => {
-    if (isSaving) return;
-    try {
-      setIsSaving(true);
-      const newKeywords = (settings?.keywords || []).filter(k => k !== keyword);
-      await updateSettings({ keywords: newKeywords });
-      toast.success('Keyword removed');
-    } catch (err) {
-      toast.error('Failed to remove keyword');
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
-  const addLocation = async () => {
-    if (!locationInput.trim() || isSaving) return;
-    const trimmed = locationInput.trim();
-    if (settings?.locations?.includes(trimmed)) {
-      toast.error('Location already exists');
-      return;
-    }
-    try {
-      setIsSaving(true);
-      const newLocations = [...(settings?.locations || []), trimmed];
-      await updateSettings({ locations: newLocations });
-      setLocationInput('');
-      toast.success('Location added');
-    } catch (err) {
-      toast.error('Failed to add location');
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
-  const removeLocation = async (loc: string) => {
-    if (isSaving) return;
-    try {
-      setIsSaving(true);
-      const newLocations = (settings?.locations || []).filter(l => l !== loc);
-      await updateSettings({ locations: newLocations });
-      toast.success('Location removed');
-    } catch (err) {
-      toast.error('Failed to remove location');
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
   const handleRefreshJobs = async () => {
-    if (!tokenSaved || refreshing) {
+    if (!tokenSaved || mission.status === 'running') {
       if (!tokenSaved) toast.error('Please save your Apify token first');
       return;
     }
@@ -183,43 +134,37 @@ export function ScrapingSettingsPage({ user, onBack }: ScrapingSettingsPageProps
       return;
     }
     try {
-      // Merge profile skills into scraping keywords so user skills power the search
       const profileSkills = profile?.skills || [];
-      const manualKeywords = settings.keywords || [];
-      const mergedKeywords = Array.from(new Set([...manualKeywords, ...profileSkills]));
-      const selectedPlatforms = (settings.platforms || []).filter(platform => supportedPlatformIds.has(platform));
+      const selectedRoles = settings.keywords || [];
+      const selectedTech = settings.techKeywords || [];
+      const selectedPlatforms = (settings.platforms || []).filter(
+        platform => supportedPlatformIds.has(platform)
+      );
 
       if (selectedPlatforms.length === 0) {
-        toast.error('Select at least one supported platform before starting job discovery.');
+        toast.error('Select at least one platform before starting.');
         return;
       }
+
+      const mergedKeywords = Array.from(
+        new Set([...selectedRoles, ...selectedTech, ...profileSkills])
+      );
 
       if (mergedKeywords.length === 0) {
-        toast.error('Add at least one keyword or profile skill before starting job discovery.');
+        toast.error('Select at least one job role, tech skill, or add profile skills.');
         return;
       }
 
-      const settingsWithMergedKeywords = {
+      const settingsForScraping = {
         ...settings,
         platforms: selectedPlatforms,
         keywords: mergedKeywords,
       };
-      await refreshJobs(settingsWithMergedKeywords);
-      toast.success(`Search completed! Check Suggested Jobs.`);
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Failed to refresh jobs');
-    }
-  };
 
-  const handleToggleRemote = async () => {
-    if (isSaving) return;
-    try {
-      setIsSaving(true);
-      await updateSettings({ remoteOnly: !(settings?.remoteOnly ?? false) });
+      await startMission(user!.uid, settingsForScraping);
+      startPolling();
     } catch (err) {
-      toast.error('Failed to toggle remote filter');
-    } finally {
-      setIsSaving(false);
+      toast.error(err instanceof Error ? err.message : 'Failed to start job discovery');
     }
   };
 
@@ -315,117 +260,340 @@ export function ScrapingSettingsPage({ user, onBack }: ScrapingSettingsPageProps
         </div>
       </section>
 
-      {/* Keywords */}
-      <section className="mb-8">
-        <h3 className="px-1 mb-2 text-xs font-semibold text-slate-400 dark:text-light-grey uppercase tracking-wider">Search Keywords</h3>
-        <div className="bg-white dark:bg-card-bg rounded-xl p-4 shadow-sm border border-slate-200 dark:border-card-border">
-          <p className="text-sm text-slate-600 dark:text-light-grey mb-3">
-            Add custom keywords to search for jobs.
-          </p>
-          <div className="flex gap-2 mb-4">
-            <Input
-              placeholder="e.g., React, Python, Remote..."
-              value={keywordInput}
-              onChange={(e) => setKeywordInput(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && addKeyword()}
-            />
-            <Button onClick={addKeyword} size="sm">Add</Button>
-          </div>
-          
-          <div className="space-y-4">
-            <div>
-              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Manual Keywords</p>
-              <div className="flex flex-wrap gap-2">
-                {settings?.keywords?.map(keyword => (
-                  <Badge key={keyword} variant="secondary" className="pr-1 py-1">
-                    {keyword}
-                    <button onClick={() => removeKeyword(keyword)} className="ml-1 hover:text-red-500 flex items-center">
-                      <span className="material-icons-round text-sm">close</span>
-                    </button>
-                  </Badge>
-                ))}
-                {(!settings?.keywords || settings.keywords.length === 0) && (
-                  <span className="text-xs text-slate-400 italic">No custom keywords yet</span>
-                )}
+      {/* Mission Progress (shown when scraping is running) */}
+      {mission.status === 'running' && (
+        <section className="mb-8">
+          <h3 className="px-1 mb-2 text-xs font-semibold text-slate-400 dark:text-light-grey uppercase tracking-wider">Job Discovery Progress</h3>
+          <div className="bg-white dark:bg-card-bg rounded-xl p-4 shadow-sm border border-primary/30">
+            {/* Progress bar */}
+            <div className="mb-4">
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-2">
+                  <span className="relative flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75" />
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-primary" />
+                  </span>
+                  <span className="text-sm font-medium text-slate-900 dark:text-off-white">Running...</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <span className="text-sm font-mono font-bold text-primary">{Math.round(mission.progress)}%</span>
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="h-8 w-8 text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-full"
+                    onClick={stopScraping}
+                    disabled={pollerStopping}
+                    title="Stop Discovery"
+                  >
+                    {pollerStopping ? (
+                      <span className="material-icons-round text-lg animate-spin">autorenew</span>
+                    ) : (
+                      <span className="material-icons-round text-lg">stop_circle</span>
+                    )}
+                  </Button>
+                </div>
               </div>
+              <Progress value={mission.progress} className="h-2" />
+              <p className="text-xs text-slate-500 mt-2">{mission.currentStep}</p>
             </div>
 
-            {profile?.skills && profile.skills.length > 0 && (
-              <div>
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">From Your Profile</p>
-                <div className="flex flex-wrap gap-2">
-                  {profile.skills.map(skill => (
-                    <Badge key={skill} variant="outline" className="opacity-70 bg-slate-50 dark:bg-slate-800/30">
-                      {skill}
-                    </Badge>
-                  ))}
-                </div>
-                <p className="text-[10px] text-slate-400 mt-2 italic">
-                  * These skills are automatically included in search
-                </p>
+            {/* Step-by-step status */}
+            {mission.steps.length > 0 && (
+              <div className="space-y-2">
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Steps</p>
+                {mission.steps.map(step => (
+                  <div key={step.id} className="flex items-center gap-2 text-sm">
+                    {step.status === 'pending' && (
+                      <span className="material-icons-round text-slate-300 text-lg">radio_button_unchecked</span>
+                    )}
+                    {step.status === 'running' && (
+                      <span className="material-icons-round text-primary animate-spin text-lg">autorenew</span>
+                    )}
+                    {step.status === 'completed' && (
+                      <span className="material-icons-round text-green-500 text-lg">check_circle</span>
+                    )}
+                    {step.status === 'failed' && (
+                      <span className="material-icons-round text-red-500 text-lg">error</span>
+                    )}
+                    <span className={`flex-1 ${
+                      step.status === 'running' ? 'text-primary font-medium' :
+                      step.status === 'completed' ? 'text-green-600 dark:text-green-400' :
+                      step.status === 'failed' ? 'text-red-500' :
+                      'text-slate-400'
+                    }`}>
+                      {step.label}
+                    </span>
+                    {step.status === 'completed' && step.jobsFound > 0 && (
+                      <Badge variant="default" className="text-xs px-2 py-0.5">
+                        {step.jobsFound} jobs
+                      </Badge>
+                    )}
+                    {step.status === 'completed' && step.jobsFound === 0 && (
+                      <span className="text-xs text-slate-400">0 jobs</span>
+                    )}
+                  </div>
+                ))}
               </div>
             )}
+
+            {/* Errors */}
+            {mission.steps.some(s => s.status === 'failed') && (
+              <div className="mt-4 p-3 bg-red-50 dark:bg-red-900/10 rounded-lg">
+                <p className="text-xs font-semibold text-red-600 dark:text-red-400 mb-1">Errors</p>
+                {mission.steps.filter(s => s.status === 'failed').map(step => (
+                  <p key={step.id} className="text-xs text-red-500">
+                    {step.label}: {step.error || 'Unknown error'}
+                  </p>
+                ))}
+              </div>
+            )}
+
+            <p className="text-[10px] text-slate-400 mt-3 italic">
+              Keep this tab open while scraping runs in the background.
+            </p>
           </div>
+        </section>
+      )}
+
+      {/* Mission completed/failed summary */}
+      {(mission.status === 'completed' || mission.status === 'failed') && (
+        <section className="mb-8">
+          <h3 className="px-1 mb-2 text-xs font-semibold text-slate-400 dark:text-light-grey uppercase tracking-wider">Last Mission</h3>
+          <div className={`bg-white dark:bg-card-bg rounded-xl p-4 shadow-sm border ${
+            mission.status === 'completed' ? 'border-green-500/30' : 'border-red-500/30'
+          }`}>
+            <div className="flex items-center gap-2 mb-2">
+              <span className={`material-icons-round text-lg ${
+                mission.status === 'completed' ? 'text-green-500' : 'text-red-500'
+              }`}>
+                {mission.status === 'completed' ? 'check_circle' : 'error'}
+              </span>
+              <span className="text-sm font-medium text-slate-900 dark:text-off-white">
+                {mission.currentStep}
+              </span>
+            </div>
+            {mission.finishedAt && (
+              <p className="text-xs text-slate-400">
+                Finished: {new Date(mission.finishedAt).toLocaleString()}
+              </p>
+            )}
+            {mission.steps.length > 0 && (
+              <div className="mt-3 space-y-1">
+                {mission.steps.map(step => (
+                  <div key={step.id} className="flex items-center gap-2 text-xs">
+                    {step.status === 'completed' && (
+                      <span className="material-icons-round text-green-500 text-sm">check_circle</span>
+                    )}
+                    {step.status === 'failed' && (
+                      <span className="material-icons-round text-red-500 text-sm">error</span>
+                    )}
+                    <span className="flex-1 text-slate-600 dark:text-light-grey">{step.label}</span>
+                    {step.jobsFound > 0 && (
+                      <span className="text-primary font-medium">{step.jobsFound} jobs</span>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+            <Button
+              variant="outline"
+              size="sm"
+              className="mt-3"
+              onClick={() => mission.clearMission()}
+            >
+              Clear
+            </Button>
+          </div>
+        </section>
+      )}
+
+      {/* Job Roles */}
+      <section className="mb-8">
+        <h3 className="px-1 mb-2 text-xs font-semibold text-slate-400 dark:text-light-grey uppercase tracking-wider">
+          Job Roles
+        </h3>
+        <div className="bg-white dark:bg-card-bg rounded-xl p-4 shadow-sm border border-slate-200 dark:border-card-border">
+          <p className="text-sm text-slate-600 dark:text-light-grey mb-3">
+            Select the job roles you're looking for
+          </p>
+          <ChipSelector
+            options={JOB_ROLES}
+            selected={settings?.keywords || []}
+            onChange={async (selected) => {
+              try {
+                setIsSaving(true);
+                await updateSettings({ keywords: selected });
+              } catch {
+                toast.error('Failed to update roles');
+              } finally {
+                setIsSaving(false);
+              }
+            }}
+            searchable
+            grouped
+            maxVisible={15}
+            disabled={isSaving || mission.status === 'running'}
+          />
+        </div>
+      </section>
+
+      {/* Tech Stack */}
+      <section className="mb-8">
+        <h3 className="px-1 mb-2 text-xs font-semibold text-slate-400 dark:text-light-grey uppercase tracking-wider">
+          Tech Stack
+        </h3>
+        <div className="bg-white dark:bg-card-bg rounded-xl p-4 shadow-sm border border-slate-200 dark:border-card-border">
+          <p className="text-sm text-slate-600 dark:text-light-grey mb-3">
+            Select technologies and skills to filter by
+          </p>
+          <ChipSelector
+            options={TECH_KEYWORDS}
+            selected={settings?.techKeywords || []}
+            onChange={async (selected) => {
+              try {
+                setIsSaving(true);
+                await updateSettings({ techKeywords: selected });
+              } catch {
+                toast.error('Failed to update tech stack');
+              } finally {
+                setIsSaving(false);
+              }
+            }}
+            searchable
+            grouped
+            maxVisible={15}
+            disabled={isSaving || mission.status === 'running'}
+          />
         </div>
       </section>
 
       {/* Locations */}
       <section className="mb-8">
-        <h3 className="px-1 mb-2 text-xs font-semibold text-slate-400 dark:text-light-grey uppercase tracking-wider">Search Locations</h3>
+        <h3 className="px-1 mb-2 text-xs font-semibold text-slate-400 dark:text-light-grey uppercase tracking-wider">
+          Search Locations
+        </h3>
         <div className="bg-white dark:bg-card-bg rounded-xl p-4 shadow-sm border border-slate-200 dark:border-card-border">
           <p className="text-sm text-slate-600 dark:text-light-grey mb-3">
-            Add target cities or regions for job search.
+            Select target locations for job search
           </p>
-          <div className="flex gap-2 mb-4">
-            <Input
-              placeholder="e.g., Remote, New York, London..."
-              value={locationInput}
-              onChange={(e) => setLocationInput(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && addLocation()}
-            />
-            <Button onClick={addLocation} size="sm">Add</Button>
-          </div>
-          
-          <div className="flex flex-wrap gap-2">
-            {settings?.locations?.map(loc => (
-              <Badge key={loc} variant="outline" className="pr-1 py-1 border-primary/20 bg-primary/5">
-                <span className="flex items-center gap-1">
-                  <span className="material-icons-round text-xs text-primary">location_on</span>
-                  {loc}
-                </span>
-                <button onClick={() => removeLocation(loc)} className="ml-1 hover:text-red-500 flex items-center">
-                  <span className="material-icons-round text-sm">close</span>
-                </button>
-              </Badge>
-            ))}
-            {(!settings?.locations || settings.locations.length === 0) && (
-              <span className="text-xs text-slate-400 italic">No locations added (will search globally)</span>
-            )}
-          </div>
+          <ChipSelector
+            options={LOCATIONS}
+            selected={settings?.locations || []}
+            onChange={async (selected) => {
+              try {
+                setIsSaving(true);
+                await updateSettings({ locations: selected });
+              } catch {
+                toast.error('Failed to update locations');
+              } finally {
+                setIsSaving(false);
+              }
+            }}
+            searchable
+            grouped
+            maxVisible={10}
+            disabled={isSaving || mission.status === 'running'}
+          />
         </div>
       </section>
 
-      {/* Remote Only Toggle */}
+      {/* Experience Level */}
       <section className="mb-8">
-        <h3 className="px-1 mb-2 text-xs font-semibold text-slate-400 dark:text-light-grey uppercase tracking-wider">Filters</h3>
-        <div className="bg-white dark:bg-card-bg rounded-xl shadow-sm border border-slate-200 dark:border-card-border overflow-hidden">
-          <div className="flex items-center justify-between p-4">
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
-                <span className="material-icons-round text-lg">home_work</span>
-              </div>
-              <span className="font-medium text-slate-900 dark:text-off-white">Remote Only</span>
-            </div>
-            <label className="relative inline-block w-11 h-6 cursor-pointer">
-              <input 
-                type="checkbox" 
-                className="sr-only peer"
-                checked={settings?.remoteOnly || false}
-                onChange={handleToggleRemote}
-              />
-              <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-card-border peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-slate-600 peer-checked:bg-primary"></div>
-            </label>
-          </div>
+        <h3 className="px-1 mb-2 text-xs font-semibold text-slate-400 dark:text-light-grey uppercase tracking-wider">
+          Experience Level
+        </h3>
+        <div className="bg-white dark:bg-card-bg rounded-xl p-4 shadow-sm border border-slate-200 dark:border-card-border">
+          <p className="text-sm text-slate-600 dark:text-light-grey mb-3">
+            Filter by experience level
+          </p>
+          <ChipSelector
+            options={EXPERIENCE_LEVELS}
+            selected={settings?.experienceLevels || []}
+            onChange={async (selected) => {
+              try {
+                setIsSaving(true);
+                await updateSettings({ experienceLevels: selected });
+              } catch {
+                toast.error('Failed to update experience levels');
+              } finally {
+                setIsSaving(false);
+              }
+            }}
+            disabled={isSaving || mission.status === 'running'}
+          />
+        </div>
+      </section>
+
+      {/* Job Type */}
+      <section className="mb-8">
+        <h3 className="px-1 mb-2 text-xs font-semibold text-slate-400 dark:text-light-grey uppercase tracking-wider">
+          Job Type
+        </h3>
+        <div className="bg-white dark:bg-card-bg rounded-xl p-4 shadow-sm border border-slate-200 dark:border-card-border">
+          <ChipSelector
+            options={JOB_TYPES}
+            selected={settings?.jobTypes || []}
+            onChange={async (selected) => {
+              try {
+                setIsSaving(true);
+                await updateSettings({ jobTypes: selected });
+              } catch {
+                toast.error('Failed to update job types');
+              } finally {
+                setIsSaving(false);
+              }
+            }}
+            disabled={isSaving || mission.status === 'running'}
+          />
+        </div>
+      </section>
+
+      {/* Work Arrangement */}
+      <section className="mb-8">
+        <h3 className="px-1 mb-2 text-xs font-semibold text-slate-400 dark:text-light-grey uppercase tracking-wider">
+          Work Arrangement
+        </h3>
+        <div className="bg-white dark:bg-card-bg rounded-xl p-4 shadow-sm border border-slate-200 dark:border-card-border">
+          <ChipSelector
+            options={WORK_ARRANGEMENTS}
+            selected={settings?.workArrangements || []}
+            onChange={async (selected) => {
+              try {
+                setIsSaving(true);
+                await updateSettings({ workArrangements: selected });
+              } catch {
+                toast.error('Failed to update work arrangement');
+              } finally {
+                setIsSaving(false);
+              }
+            }}
+            disabled={isSaving || mission.status === 'running'}
+          />
+        </div>
+      </section>
+
+      {/* Posted Within */}
+      <section className="mb-8">
+        <h3 className="px-1 mb-2 text-xs font-semibold text-slate-400 dark:text-light-grey uppercase tracking-wider">
+          Posted Within
+        </h3>
+        <div className="bg-white dark:bg-card-bg rounded-xl p-4 shadow-sm border border-slate-200 dark:border-card-border">
+          <ChipSelector
+            options={POSTED_WITHIN}
+            selected={settings?.postedWithin ? [settings.postedWithin] : ['any']}
+            onChange={async (selected) => {
+              try {
+                setIsSaving(true);
+                await updateSettings({ postedWithin: selected[0] || 'any' });
+              } catch {
+                toast.error('Failed to update time filter');
+              } finally {
+                setIsSaving(false);
+              }
+            }}
+            singleSelect
+            disabled={isSaving || mission.status === 'running'}
+          />
         </div>
       </section>
 
@@ -444,7 +612,7 @@ export function ScrapingSettingsPage({ user, onBack }: ScrapingSettingsPageProps
           </div>
           <Button 
             onClick={handleRefreshJobs} 
-            disabled={refreshing || !tokenSaved}
+            disabled={mission.status === 'running' || !tokenSaved || pollerStopping}
             className="w-full"
           >
             {!tokenSaved ? (
@@ -452,10 +620,15 @@ export function ScrapingSettingsPage({ user, onBack }: ScrapingSettingsPageProps
                 <span className="material-icons-round mr-2 text-sm">lock</span>
                 Save Apify Token First
               </>
-            ) : refreshing ? (
+            ) : pollerStopping ? (
+              <>
+                <span className="material-icons-round mr-2 animate-spin text-sm">autorenew</span>
+                Stopping...
+              </>
+            ) : mission.status === 'running' ? (
               <>
                 <span className="animate-spin mr-2">⏳</span>
-                Searching Platforms...
+                Scraping in Progress...
               </>
             ) : (
               <>
@@ -467,6 +640,11 @@ export function ScrapingSettingsPage({ user, onBack }: ScrapingSettingsPageProps
           {!tokenSaved && (
             <p className="text-xs text-amber-600 dark:text-amber-400 mt-2 text-center">
               Please save your Apify token above to enable job discovery
+            </p>
+          )}
+          {mission.status === 'running' && (
+            <p className="text-xs text-primary mt-2 text-center">
+              Scraping is running in the background. You can navigate away.
             </p>
           )}
         </div>

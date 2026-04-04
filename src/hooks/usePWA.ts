@@ -8,7 +8,7 @@ export function usePWA() {
   const [isStandalone, setIsStandalone] = useState(false);
   const [updateAvailable, setUpdateAvailable] = useState(false);
   const [offlineReady, setOfflineReady] = useState(false);
-  const [updateSW, setUpdateSW] = useState<(() => void) | null>(null);
+  const [updateSW, setUpdateSW] = useState<((reload?: boolean) => Promise<void>) | null>(null);
 
   const dismissUpdate = useCallback(() => {
     localStorage.setItem(UPDATE_DISMISSED_KEY, Date.now().toString());
@@ -21,20 +21,26 @@ export function usePWA() {
     setUpdateAvailable(true);
   }, []);
 
-  const checkForUpdate = useCallback(() => {
+  const checkForUpdate = useCallback(async () => {
     console.log('PWA: Manual check for update triggered');
     
     localStorage.removeItem(UPDATE_DISMISSED_KEY);
-    setUpdateAvailable(false);
     
-    if (updateSW) {
-      updateSW();
-      console.log('PWA: Update check triggered');
-    } else {
-      console.warn('PWA: No service worker available for update check');
-      setTimeout(() => setUpdateAvailable(true), 500);
+    if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
+      try {
+        const registration = await navigator.serviceWorker.getRegistration();
+        if (registration) {
+          console.log('PWA: Requesting service worker update...');
+          await registration.update();
+          console.log('PWA: Service worker update check completed');
+        } else {
+          console.warn('PWA: No service worker registration found');
+        }
+      } catch (e) {
+        console.error('PWA: Failed to check for update:', e);
+      }
     }
-  }, [updateSW]);
+  }, []);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -69,7 +75,7 @@ export function usePWA() {
   useEffect(() => {
     if (typeof window === 'undefined' || !('serviceWorker' in navigator)) return;
 
-    let swInstance: (() => void) | null = null;
+    let swInstance: ((reload?: boolean) => Promise<void>) | null = null;
 
     const initSW = async () => {
       try {
@@ -79,6 +85,17 @@ export function usePWA() {
         const sw = registerSW({
           onNeedRefresh() {
             console.log('PWA: New content available, need refresh');
+            
+            // Check if we recently dismissed this update
+            const dismissed = localStorage.getItem(UPDATE_DISMISSED_KEY);
+            const now = Date.now();
+            const oneHour = 60 * 60 * 1000;
+            
+            if (dismissed && (now - parseInt(dismissed)) < oneHour) {
+              console.log('PWA: Update available but suppressed by recent dismissal');
+              return;
+            }
+            
             setUpdateAvailable(true);
           },
           onOfflineReady() {
@@ -115,17 +132,26 @@ export function usePWA() {
     setIsInstallable(false);
   };
 
-  const handleUpdateNow = useCallback(() => {
-    console.log('PWA: Update Now clicked, reloading...');
-    if (updateSW) {
-      updateSW();
-    }
-    setUpdateAvailable(false);
+  const handleUpdateNow = useCallback(async () => {
+    console.log('PWA: Update Now clicked, triggering update...');
     
-    setTimeout(() => {
-      console.log('PWA: Forcing page reload...');
+    if (updateSW) {
+      console.log('PWA: Calling updateSW(true) for skipWaiting and reload');
+      try {
+        // We don't call setUpdateAvailable(false) here because the reload 
+        // will take care of it, and we want to keep the UI consistent 
+        // until the page reloads.
+        await updateSW(true);
+      } catch (error) {
+        console.error('PWA: Error during updateSW(true):', error);
+        setUpdateAvailable(false);
+        window.location.reload();
+      }
+    } else {
+      console.log('PWA: No updateSW function available, forcing reload');
+      setUpdateAvailable(false);
       window.location.reload();
-    }, 500);
+    }
   }, [updateSW]);
 
   return {

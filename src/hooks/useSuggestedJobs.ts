@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { suggestedJobsService } from '../services/firebase';
 import { refreshSuggestedJobs } from '../services/scraping';
+import { getMissionState } from '../services/scrapingProgress';
 import type { SuggestedJob, ScrapingSettings } from '../types';
 
 interface SuggestedJobsState {
@@ -154,6 +155,8 @@ export function useSuggestedJobs(userId: string | null): SuggestedJobsState & Su
   const totalCount = useMemo(() => suggestedJobs.length, [suggestedJobs]);
 
   const lastRefreshTime = useMemo(() => {
+    const mission = getMissionState();
+    if (mission.finishedAt) return mission.finishedAt;
     if (suggestedJobs.length === 0) return null;
     const sorted = [...suggestedJobs].sort((a, b) => 
       new Date(b.fetchedAt).getTime() - new Date(a.fetchedAt).getTime()

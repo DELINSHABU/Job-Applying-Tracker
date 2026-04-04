@@ -250,18 +250,26 @@ export interface ScrapingSettings {
   id: string;
   userId: string;
   
-  // Target platforms
+  // Target platforms (selected from predefined list)
   platforms: string[];
   
-  // Search parameters
-  keywords: string[]; // Combined from profile + manual additions
-  locations: string[]; // Support multiple locations
+  // Search parameters (from predefined lists)
+  keywords: string[];     // Selected role values from JOB_ROLES
+  techKeywords: string[]; // Selected values from TECH_KEYWORDS
+  locations: string[];    // Selected values from LOCATIONS
+  
+  // Filters (all from predefined lists)
+  experienceLevels: string[];   // Multi-select from EXPERIENCE_LEVELS
+  jobTypes: string[];           // Multi-select from JOB_TYPES
+  workArrangements: string[];   // Multi-select from WORK_ARRANGEMENTS
+  postedWithin: string;         // Single-select from POSTED_WITHIN ('any' default)
+  
+  // Legacy — keep for backward compat
   remoteOnly?: boolean;
   
-  // Filters
+  // Salary range (optional)
   minSalary?: number;
   maxSalary?: number;
-  experienceLevel?: 'entry' | 'mid' | 'senior' | 'all';
   
   // Authentication (stored separately for security)
   // Cookie tokens stored encrypted in localStorage

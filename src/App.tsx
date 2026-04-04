@@ -3,6 +3,7 @@ import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'motion/react';
 import { pageVariants, slideInRightVariants } from './lib/animations';
 import { BottomNav, Sidebar, DesktopHeader, LoadingScreen } from './components';
+import { ScrapingProgressBanner } from './components/ScrapingProgressBanner';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { Toaster } from './components/ui/sonner';
 import { useAuth } from './hooks/useAuth';
@@ -11,6 +12,8 @@ import { useSearch } from './hooks/useSearch';
 import { useCustomPlatforms } from './hooks/useCustomPlatforms';
 import { useDailyGoal } from './hooks/useDailyGoal';
 import { usePWA } from './hooks/usePWA';
+import { useScrapingPoller } from './hooks/useScrapingPoller';
+import { getMissionState } from './services/scrapingProgress';
 import { getLocalDateString } from './lib/utils';
 import { UpdatePrompt } from './components/UpdatePrompt';
 import type { Job, JobFormData, NavTab, SuggestedJob } from './types';
@@ -135,6 +138,19 @@ function App() {
     };
     toast.success(messages[milestone] || `Amazing! ${milestone} day streak!`, { duration: 8000 });
   });
+
+  // Scraping poller for background job discovery
+  const { startPolling: startScrapingPoller } = useScrapingPoller(user?.uid || null);
+
+  // Check for running mission on mount
+  useEffect(() => {
+    if (user?.uid) {
+      const mission = getMissionState();
+      if (mission.status === 'running') {
+        startScrapingPoller();
+      }
+    }
+  }, [user?.uid, startScrapingPoller]);
 
   // Handler for setting daily goal
   const handleSetDailyGoal = async (target: number) => {
@@ -266,6 +282,10 @@ function App() {
   };
 
   const handleOpenScrapingSettings = () => {
+    setActiveTab('scraping-settings');
+  };
+
+  const handleBannerNavigate = () => {
     setActiveTab('scraping-settings');
   };
 
@@ -662,6 +682,9 @@ function App() {
           </motion.div>
         ) : (
           <div key="main-app" className="contents">
+            {/* Scraping Progress Banner - shown at app level so it survives navigation */}
+            <ScrapingProgressBanner onNavigate={handleBannerNavigate} />
+
             {/* Mobile Layout */}
             <div className={`lg:hidden min-h-screen bg-app-bg-light dark:bg-app-bg text-slate-900 dark:text-off-white font-display ${activeTab !== 'details' && activeTab !== 'profile' && activeTab !== 'mission' ? 'pb-24' : ''}`}>
               <Suspense fallback={<LoadingSpinner />}>
