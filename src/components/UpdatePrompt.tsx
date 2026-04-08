@@ -16,6 +16,14 @@ export function UpdatePrompt({ open, onUpdate, onLater }: UpdatePromptProps) {
   const [updateComplete, setUpdateComplete] = useState(false);
 
   useEffect(() => {
+    if (!open) {
+      setIsUpdating(false);
+      setUpdateComplete(false);
+      setProgress(0);
+    }
+  }, [open]);
+
+  useEffect(() => {
     if (isUpdating && !updateComplete) {
       setProgress(0);
       const interval = setInterval(() => {
@@ -44,8 +52,20 @@ export function UpdatePrompt({ open, onUpdate, onLater }: UpdatePromptProps) {
   const handleUpdate = async () => {
     setIsUpdating(true);
     setUpdateComplete(false);
-    onUpdate();
   };
+
+  useEffect(() => {
+    if (updateComplete && isUpdating) {
+      const timer = setTimeout(() => {
+        onUpdate();
+        // Fallback reload in case onUpdate doesn't trigger it
+        setTimeout(() => {
+          window.location.reload();
+        }, 500);
+      }, 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [updateComplete, isUpdating, onUpdate]);
 
   const handleLater = () => {
     onLater();

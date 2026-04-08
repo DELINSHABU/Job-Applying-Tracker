@@ -142,6 +142,11 @@ export function usePWA() {
         // will take care of it, and we want to keep the UI consistent 
         // until the page reloads.
         await updateSW(true);
+        // Fallback reload if updateSW(true) didn't trigger it after 2 seconds
+        setTimeout(() => {
+          console.log('PWA: updateSW(true) did not reload, forcing reload');
+          window.location.reload();
+        }, 2000);
       } catch (error) {
         console.error('PWA: Error during updateSW(true):', error);
         setUpdateAvailable(false);
